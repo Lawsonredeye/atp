@@ -23,6 +23,7 @@ type Question struct {
 	Id        int       `json:"id"`
 	SubjectId int       `json:"subject_id"`
 	Text      string    `json:"text"`
+	IsMultipleChoice bool `json:"is_multiple_choice"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -79,7 +80,10 @@ func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option Q
 		return err
 	}
 	if option.IsCorrect {
-		query = "Insert into answers "
+		qr.CreateAnswer(ctx, Answer{QuestionId: option.QuestionId,
+			Text: option.Text,
+			CreatedAt: option.CreatedAt,
+			UpdatedAt: option.UpdatedAt})
 	}
 	return nil
 }

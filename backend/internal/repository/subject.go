@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -28,7 +29,7 @@ type subjectRepository struct {
 }
 
 func (sr *subjectRepository) GetSubjectById(ctx context.Context, id int) (*Subject, error) {
-	query := "SELECT id, name FROM subjects WHERE id = $1"
+	query := "SELECT id, name, created_at, updated_at FROM subjects WHERE id = $1"
 	row := sr.db.QueryRowContext(ctx, query, id)
 	var subject Subject
 	err := row.Scan(&subject.Id, &subject.Name, &subject.CreatedAt, &subject.UpdatedAt)
@@ -48,15 +49,33 @@ func (sr *subjectRepository) CreateSubject(ctx context.Context, subject Subject)
 }
 
 func (sr *subjectRepository) UpdateSubjectById(ctx context.Context, id int, subject Subject) (*Subject, error) {
-	query := "UPDATE subjects SET name = $2, updated_at = $3 WHERE id = $1 RETURNING id, name"
-	row := sr.db.QueryRowContext(ctx, query, id, subject.Name, subject.UpdatedAt)
-	if row == nil {
-		return nil, errors.New("subject not found")
-	}
-	var resp Subject
-	err := row.Scan(&resp.Id, &resp.Name)
+	query := fmt.Sprintf("UPDATE subjects SET name = '%s', updated_at = '%s' WHERE id = %d", subject.Name, subject.UpdatedAt, id)
+	_, err := sr.db.ExecContext(ctx, query)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("subject not found")
+		}
+		if errors.Is(err, context.Canceled) {
+			return nil, errors.New("context canceled")
+		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, errors.New("context deadline exceeded")
+		}
 		return nil, err
 	}
-	return &resp, nil
+
+	resp, err := sr.GetSubjectById(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("subject not found")
+		}
+		if errors.Is(err, context.Canceled) {
+			return nil, errors.New("context canceled")
+		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, errors.New("context deadline exceeded")
+		}
+		return nil, err
+	}
+	return resp, nil
 }

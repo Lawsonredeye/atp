@@ -19,8 +19,9 @@ func setUP(t *testing.T) *sql.DB {
 	}
 	queries := []string{
 		"CREATE TABLE question_options (id integer primary key autoincrement, question_id integer, text text, is_correct boolean, created_at timestamp, updated_at timestamp)",
-		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, text text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, text text, is_multiple_choice boolean, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, text text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE subjects (id integer primary key autoincrement, name text, created_at timestamp, updated_at timestamp)",
 	}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
@@ -37,10 +38,11 @@ func TestGetQuestionById(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := repo.CreateQuestion(ctx, Question{
-		SubjectId: 1,
-		Text:      "test",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		SubjectId:        1,
+		Text:             "test",
+		IsMultipleChoice: false,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
 	})
 	assert.Nil(t, err)
 	createdQuestion, err := repo.GetQuestionById(ctx, 1)
@@ -54,10 +56,11 @@ func TestCreateQuestion(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := repo.CreateQuestion(ctx, Question{
-		SubjectId: 1,
-		Text:      "test",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		SubjectId:        1,
+		Text:             "test",
+		IsMultipleChoice: false,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
 	})
 	assert.Nil(t, err)
 }
