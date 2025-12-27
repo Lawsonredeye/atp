@@ -9,12 +9,13 @@ import (
 )
 
 type SubjectRepository interface {
-	GetSubjectById(ctx context.Context, id int) (*Subject, error)
-	CreateSubject(ctx context.Context, subject Subject) error
+	GetSubjectById(ctx context.Context, id int64) (*Subject, error)
+	CreateSubject(ctx context.Context, subject Subject) (int64, error)
+	UpdateSubjectById(ctx context.Context, id int64, subject Subject) (*Subject, error)
 }
 
 type Subject struct {
-	Id        int       `json:"id"`
+	Id        int64     `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -28,7 +29,7 @@ type subjectRepository struct {
 	db *sql.DB
 }
 
-func (sr *subjectRepository) GetSubjectById(ctx context.Context, id int) (*Subject, error) {
+func (sr *subjectRepository) GetSubjectById(ctx context.Context, id int64) (*Subject, error) {
 	query := "SELECT id, name, created_at, updated_at FROM subjects WHERE id = $1"
 	row := sr.db.QueryRowContext(ctx, query, id)
 	var subject Subject
@@ -39,16 +40,16 @@ func (sr *subjectRepository) GetSubjectById(ctx context.Context, id int) (*Subje
 	return &subject, nil
 }
 
-func (sr *subjectRepository) CreateSubject(ctx context.Context, subject Subject) error {
+func (sr *subjectRepository) CreateSubject(ctx context.Context, subject Subject) (int64, error) {
 	query := "INSERT INTO subjects (name, created_at, updated_at) VALUES ($1, $2, $3)"
-	_, err := sr.db.ExecContext(ctx, query, subject.Name, subject.CreatedAt, subject.UpdatedAt)
+	result, err := sr.db.ExecContext(ctx, query, subject.Name, subject.CreatedAt, subject.UpdatedAt)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return result.LastInsertId()
 }
 
-func (sr *subjectRepository) UpdateSubjectById(ctx context.Context, id int, subject Subject) (*Subject, error) {
+func (sr *subjectRepository) UpdateSubjectById(ctx context.Context, id int64, subject Subject) (*Subject, error) {
 	query := fmt.Sprintf("UPDATE subjects SET name = '%s', updated_at = '%s' WHERE id = %d", subject.Name, subject.UpdatedAt, id)
 	_, err := sr.db.ExecContext(ctx, query)
 	if err != nil {

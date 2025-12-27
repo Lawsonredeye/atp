@@ -13,12 +13,13 @@ func TestCreateSubject(t *testing.T) {
 	repo := NewSubjectRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateSubject(ctx, Subject{
+	id, err := repo.CreateSubject(ctx, Subject{
 		Name:      "test",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, id, int64(1))
 }
 
 func TestGetSubjectById(t *testing.T) {
@@ -27,13 +28,13 @@ func TestGetSubjectById(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// create the subject first and attempt to get it
-	err := repo.CreateSubject(ctx, Subject{
+	id, err := repo.CreateSubject(ctx, Subject{
 		Name:      "test",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
 	assert.Nil(t, err)
-	subject, err := repo.GetSubjectById(ctx, 1)
+	subject, err := repo.GetSubjectById(ctx, id)
 	assert.Nil(t, err)
 	assert.Equal(t, subject.Name, "test")
 }
@@ -44,19 +45,19 @@ func TestUpdateSubjectById(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// create the subject first and attempt to update it
-	err := repo.CreateSubject(ctx, Subject{
+	id, err := repo.CreateSubject(ctx, Subject{
 		Name:      "test",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
 	assert.Nil(t, err)
-	subject, err := repo.GetSubjectById(ctx, 1)
+	subject, err := repo.GetSubjectById(ctx, id)
 	assert.Nil(t, err)
 	assert.Equal(t, subject.Name, "test")
 
 	subject.Name = "updated"
 	subject.UpdatedAt = time.Now()
-	updatedSubject, err := repo.UpdateSubjectById(ctx, 1, *subject)
+	updatedSubject, err := repo.UpdateSubjectById(ctx, id, *subject)
 	assert.Nil(t, err)
 	assert.Equal(t, updatedSubject.Name, "updated")
 }
