@@ -20,12 +20,12 @@ type QuestionRepository interface {
 }
 
 type Question struct {
-	Id        int       `json:"id"`
-	SubjectId int       `json:"subject_id"`
-	Text      string    `json:"text"`
-	IsMultipleChoice bool `json:"is_multiple_choice"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id               int       `json:"id"`
+	SubjectId        int       `json:"subject_id"`
+	Text             string    `json:"text"`
+	IsMultipleChoice bool      `json:"is_multiple_choice"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type Answer struct {
@@ -53,13 +53,13 @@ func NewQuestionRepository(db *sql.DB) *questionRepository {
 	return &questionRepository{db: db}
 }
 
-func (qr *questionRepository) CreateQuestion(ctx context.Context, question Question) error {
+func (qr *questionRepository) CreateQuestion(ctx context.Context, question Question) (int64, error) {
 	query := "INSERT INTO questions (subject_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-	_, err := qr.db.ExecContext(ctx, query, question.SubjectId, question.Text, question.CreatedAt, question.UpdatedAt)
+	res, err := qr.db.ExecContext(ctx, query, question.SubjectId, question.Text, question.CreatedAt, question.UpdatedAt)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return res.LastInsertId()
 }
 
 func (qr *questionRepository) GetQuestionById(ctx context.Context, id int) (*Question, error) {
@@ -73,19 +73,19 @@ func (qr *questionRepository) GetQuestionById(ctx context.Context, id int) (*Que
 	return &question, nil
 }
 
-func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option QuestionOptions) error {
+func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option QuestionOptions) (int64, error) {
 	query := "INSERT INTO question_options (question_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-	_, err := qr.db.ExecContext(ctx, query, option.QuestionId, option.Text, option.CreatedAt, option.UpdatedAt)
+	res, err := qr.db.ExecContext(ctx, query, option.QuestionId, option.Text, option.CreatedAt, option.UpdatedAt)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if option.IsCorrect {
 		qr.CreateAnswer(ctx, Answer{QuestionId: option.QuestionId,
-			Text: option.Text,
+			Text:      option.Text,
 			CreatedAt: option.CreatedAt,
 			UpdatedAt: option.UpdatedAt})
 	}
-	return nil
+	return res.LastInsertId()
 }
 
 func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId int) ([]*QuestionOptions, error) {
@@ -107,24 +107,22 @@ func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId
 	return options, nil
 }
 
-func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answer) error {
+func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answer) (int64, error) {
 	query := "INSERT INTO answers (question_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
 	res, err := qr.db.ExecContext(ctx, query, answer.QuestionId, answer.Text, answer.CreatedAt, answer.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return errors.New("question not found")
+			return 0, errors.New("question not found")
 		}
 		if errors.Is(err, context.Canceled) {
-			return errors.New("context canceled")
+			return 0, errors.New("context canceled")
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
-			return errors.New("context deadline exceeded")
+			return 0, errors.New("context deadline exceeded")
 		}
-		return err
+		return 0, err
 	}
-	id, _ := res.LastInsertId()
-	fmt.Printf("DEBUG: Created Answer ID: %d\n", id)
-	return nil
+	return res.LastInsertId()
 }
 
 func (qr *questionRepository) GetAnswerById(ctx context.Context, id int) (*Answer, error) {

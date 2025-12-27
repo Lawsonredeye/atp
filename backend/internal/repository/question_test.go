@@ -37,7 +37,7 @@ func TestGetQuestionById(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateQuestion(ctx, Question{
+	createdQuestionId, err := repo.CreateQuestion(ctx, Question{
 		SubjectId:        1,
 		Text:             "test",
 		IsMultipleChoice: false,
@@ -45,9 +45,7 @@ func TestGetQuestionById(t *testing.T) {
 		UpdatedAt:        time.Now(),
 	})
 	assert.Nil(t, err)
-	createdQuestion, err := repo.GetQuestionById(ctx, 1)
-	assert.Nil(t, err)
-	assert.NotNil(t, createdQuestion)
+	assert.Equal(t, createdQuestionId, int64(1))
 }
 
 func TestCreateQuestion(t *testing.T) {
@@ -55,7 +53,7 @@ func TestCreateQuestion(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateQuestion(ctx, Question{
+	id, err := repo.CreateQuestion(ctx, Question{
 		SubjectId:        1,
 		Text:             "test",
 		IsMultipleChoice: false,
@@ -63,6 +61,7 @@ func TestCreateQuestion(t *testing.T) {
 		UpdatedAt:        time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, id, int64(1))
 }
 
 func TestCreateQuestionOption(t *testing.T) {
@@ -70,7 +69,7 @@ func TestCreateQuestionOption(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateQuestionOption(ctx, QuestionOptions{
+	createdOptionId, err := repo.CreateQuestionOption(ctx, QuestionOptions{
 		QuestionId: 1,
 		Text:       "test",
 		IsCorrect:  true,
@@ -78,6 +77,7 @@ func TestCreateQuestionOption(t *testing.T) {
 		UpdatedAt:  time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, createdOptionId, int64(1))
 }
 
 func TestGetQuestionOptions(t *testing.T) {
@@ -85,7 +85,7 @@ func TestGetQuestionOptions(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateQuestionOption(ctx, QuestionOptions{
+	_, err := repo.CreateQuestionOption(ctx, QuestionOptions{
 		QuestionId: 1,
 		Text:       "test",
 		IsCorrect:  true,
@@ -103,13 +103,14 @@ func TestCreateAnswer(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
 		QuestionId: 1,
 		Text:       "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, createdOptionId, int64(1))
 }
 
 func TestGetAnswerById(t *testing.T) {
@@ -117,13 +118,14 @@ func TestGetAnswerById(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
 		QuestionId: 1,
 		Text:       "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, createdOptionId, int64(1))
 
 	createdAnswer, err := repo.GetAnswerById(ctx, 1)
 	assert.Nil(t, err)
@@ -135,13 +137,14 @@ func TestUpdateAnswerByID(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
 		QuestionId: 1,
 		Text:       "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
 	assert.Nil(t, err)
+	assert.Equal(t, createdOptionId, int64(1))
 
 	createdAnswer, err := repo.GetAnswerById(ctx, 1)
 	assert.Nil(t, err)
