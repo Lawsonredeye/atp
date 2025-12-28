@@ -1,26 +1,52 @@
-version: '3'
 services:
-  db:
-    image: postgres:15-alpine
+  postgres:
+    image: postgres:16-alpine
+    container_name: otterprep-postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app_db
+      POSTGRES_USER: otterprep
+      POSTGRES_PASSWORD: otterprep_password
+      POSTGRES_DB: otterprep_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otterprep"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: otterprep-postgres-test
+    environment:
+      POSTGRES_USER: otterprep_test
+      POSTGRES_PASSWORD: otterprep_test_password
+      POSTGRES_DB: otterprep_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otterprep_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    container_name: otterprep-redis
     ports:
-      - "6379:6379"
+      - "6370:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  backend:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-      - redis
-    environment:
-      DATABASE_URL: postgres://user:password@db:5432/app_db?sslmode=disable
-      REDIS_URL: redis://redis:6379
+volumes:
+  postgres_data:
+  postgres_data_test:
+  redis_data:
