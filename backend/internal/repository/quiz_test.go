@@ -202,3 +202,22 @@ func TestGetQuizById(t *testing.T) {
 	assert.Equal(t, quiz.Text, "test")
 	fmt.Printf("fetched quiz: %+v\n", quiz)
 }
+
+// func TestGenerateQuizBySubjectID(t *testing.T) {
+// 	pool := setUP(t)
+// 	repo := NewQuizRepository(pool)
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+// 	subjectRepo := NewSubjectRepository(pool)
+// 	subjectId, err := subjectRepo.CreateSubject(ctx, Subject{
+// 		Name:      "test",
+// 		CreatedAt: time.Now(),
+// 		UpdatedAt: time.Now(),
+// 	})
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, subjectId, int64(1))
+// 	quizTest, err := repo.GenerateQuizBySubjectID(ctx, subjectId)
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, quizTest)
+// 	fmt.Printf("fetched quiz: %+v\n", quizTest)
+// }
