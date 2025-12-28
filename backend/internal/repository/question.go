@@ -11,12 +11,13 @@ import (
 // This handles the database operations for fetching questions and its answers.
 
 type QuestionRepository interface {
-	GetQuestionById(ctx context.Context, id int) (*Question, error)
-	CreateQuestion(ctx context.Context, question Question) error
-	CreateQuestionOption(ctx context.Context, option QuestionOptions) error
-	GetQuestionOptions(ctx context.Context, questionId int) ([]*QuestionOptions, error)
-	CreateAnswer(ctx context.Context, answer Answer) error
-	GetAnswerById(ctx context.Context, id int) (*Answer, error)
+	GetQuestionById(ctx context.Context, id int64) (*Question, error)
+	GetRandomQuestion(ctx context.Context, subjectId int64) (*Question, error)
+	CreateQuestion(ctx context.Context, question Question) (int64, error)
+	CreateQuestionOption(ctx context.Context, option QuestionOptions) (int64, error)
+	GetQuestionOptions(ctx context.Context, questionId int64) ([]QuestionOptions, error)
+	CreateAnswer(ctx context.Context, answer Answer) (int64, error)
+	GetAnswerById(ctx context.Context, id int64) (*Answer, error)
 }
 
 type Question struct {
@@ -54,19 +55,30 @@ func NewQuestionRepository(db *sql.DB) *questionRepository {
 }
 
 func (qr *questionRepository) CreateQuestion(ctx context.Context, question Question) (int64, error) {
-	query := "INSERT INTO questions (subject_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-	res, err := qr.db.ExecContext(ctx, query, question.SubjectId, question.Text, question.CreatedAt, question.UpdatedAt)
+	query := "INSERT INTO questions (subject_id, text, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+	res, err := qr.db.ExecContext(ctx, query, question.SubjectId, question.Text, question.IsMultipleChoice, question.CreatedAt, question.UpdatedAt)
 	if err != nil {
 		return 0, err
 	}
 	return res.LastInsertId()
 }
 
-func (qr *questionRepository) GetQuestionById(ctx context.Context, id int) (*Question, error) {
-	query := "SELECT id, subject_id, text FROM questions WHERE id = $1"
+func (qr *questionRepository) GetQuestionById(ctx context.Context, id int64) (*Question, error) {
+	query := "SELECT id, subject_id, text, is_multiple_choice FROM questions WHERE id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)
 	var question Question
-	err := row.Scan(&question.Id, &question.SubjectId, &question.Text)
+	err := row.Scan(&question.Id, &question.SubjectId, &question.Text, &question.IsMultipleChoice)
+	if err != nil {
+		return nil, err
+	}
+	return &question, nil
+}
+
+func (qr *questionRepository) GetRandomQuestion(ctx context.Context, subjectId int64) (*Question, error) {
+	query := "SELECT id, subject_id, text, is_multiple_choice FROM questions WHERE subject_id = $1 ORDER BY random() LIMIT 1"
+	row := qr.db.QueryRowContext(ctx, query, subjectId)
+	var question Question
+	err := row.Scan(&question.Id, &question.SubjectId, &question.Text, &question.IsMultipleChoice)
 	if err != nil {
 		return nil, err
 	}
@@ -88,21 +100,21 @@ func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option Q
 	return res.LastInsertId()
 }
 
-func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId int) ([]*QuestionOptions, error) {
+func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId int64) ([]QuestionOptions, error) {
 	query := "SELECT id, question_id, text FROM question_options WHERE question_id = $1"
 	rows, err := qr.db.QueryContext(ctx, query, questionId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var options []*QuestionOptions
+	var options []QuestionOptions
 	for rows.Next() {
 		var option QuestionOptions
 		err := rows.Scan(&option.Id, &option.QuestionId, &option.Text)
 		if err != nil {
 			return nil, err
 		}
-		options = append(options, &option)
+		options = append(options, option)
 	}
 	return options, nil
 }
@@ -125,7 +137,7 @@ func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answer) (
 	return res.LastInsertId()
 }
 
-func (qr *questionRepository) GetAnswerById(ctx context.Context, id int) (*Answer, error) {
+func (qr *questionRepository) GetAnswerById(ctx context.Context, id int64) (*Answer, error) {
 	query := "SELECT id, question_id, text FROM answers WHERE id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)
 	var answer Answer
@@ -168,4 +180,29 @@ func (qr *questionRepository) UpdateAnswerByID(ctx context.Context, answer Answe
 		return nil, err
 	}
 	return &resp, nil
+}
+
+func (qr *questionRepository) GetAllQuestions(ctx context.Context) ([]Question, error) {
+	query := "SELECT id, subject_id, text FROM questions"
+	rows, err := qr.db.QueryContext(ctx, query)
+	if err != nil {
+		fmt.Println("errors :", err)
+		return nil, err
+	}
+	defer rows.Close()
+	var questions []Question
+	for rows.Next() {
+		var question Question
+		err := rows.Scan(&question.Id, &question.SubjectId, &question.Text)
+		if err != nil {
+			fmt.Println("error storing values: ", err)
+			return nil, err
+		}
+		questions = append(questions, question)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	fmt.Println("all questions:", len(questions))
+	return questions, nil
 }

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
@@ -46,6 +45,25 @@ func TestGetQuestionById(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, createdQuestionId, int64(1))
+}
+
+func TestGetRandomQuestion(t *testing.T) {
+	pool := setUP(t)
+	repo := NewQuestionRepository(pool)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	createdQuestionId, err := repo.CreateQuestion(ctx, Question{
+		SubjectId:        1,
+		Text:             "test",
+		IsMultipleChoice: false,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, createdQuestionId, int64(1))
+	createdQuestion, err := repo.GetRandomQuestion(ctx, 1)
+	assert.Nil(t, err)
+	assert.Equal(t, createdQuestion.Id, int(createdQuestionId))
 }
 
 func TestCreateQuestion(t *testing.T) {
@@ -159,5 +177,4 @@ func TestUpdateAnswerByID(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.NotNil(t, updatedAnswer, "should have updated answer")
-	fmt.Println("updated answer: ", updatedAnswer)
 }
