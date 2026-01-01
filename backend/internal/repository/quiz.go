@@ -80,6 +80,7 @@ func (qr *quizRepository) CreateMultipleQuiz(ctx context.Context, quiz []Quiz) (
 	return 0, nil
 }
 
+// GetQuizById This generates a quick quiz question from db
 func (qr *quizRepository) GetQuizById(ctx context.Context, id int64) (*Quiz, error) {
 	query := "SELECT text, subject_id, is_multiple_choice, created_at, updated_at FROM questions WHERE id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)

@@ -67,6 +67,8 @@ func (qs *quizService) GetQuizById(ctx context.Context, id int64) (*repository.Q
 	return qs.quizRepository.GetQuizById(ctx, id)
 }
 
+// SubmitQuiz takes a list of quiz request and checks to see if the request questions
+// has the correct options selected.
 func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error) {
 	score := int64(0)
 	if len(quizRequest) == 0 {
