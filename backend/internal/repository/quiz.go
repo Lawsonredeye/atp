@@ -27,7 +27,6 @@ type QuizRepository interface {
 	CreateQuiz(ctx context.Context, quiz Quiz) (int64, error)
 	CreateMultipleQuiz(ctx context.Context, quiz []Quiz) (int64, error)
 	GetQuizById(ctx context.Context, id int64) (*Quiz, error)
-	SubmitQuiz(ctx context.Context, quizRequest []QuizRequest) (int64, []QuestionOptions, []Question, error)
 }
 
 type quizRepository struct {
@@ -104,71 +103,4 @@ func (qr *quizRepository) GetQuizById(ctx context.Context, id int64) (*Quiz, err
 		quiz.QuestionOptions = append(quiz.QuestionOptions, option)
 	}
 	return &quiz, nil
-}
-
-// SubmitQuiz takes the request and checks if the users submitted quiz is correct and scores the quiz.
-func (qr *quizRepository) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest) (int64, []QuestionOptions, []Question, error) {
-	var score int64
-	var userOptions []QuestionOptions
-	var questions []Question
-
-	for _, req := range quizRequest {
-		query := "SELECT id, subject_id, text, is_multiple_choice, created_at, updated_at FROM questions WHERE id = $1"
-		var q Question
-		err := qr.db.QueryRowContext(ctx, query, req.QuizId).Scan(&q.Id, &q.SubjectId, &q.Text, &q.IsMultipleChoice, &q.CreatedAt, &q.UpdatedAt)
-		if err != nil {
-			return 0, nil, nil, err
-		}
-		questions = append(questions, q)
-
-		var currentOptions []QuestionOptions
-		for _, optionId := range req.OptionIds {
-			query = "SELECT id, question_id, text, is_correct, created_at, updated_at FROM question_options WHERE id = $1"
-			var option QuestionOptions
-			err := qr.db.QueryRowContext(ctx, query, optionId).Scan(&option.Id, &option.QuestionId, &option.Text, &option.IsCorrect, &option.CreatedAt, &option.UpdatedAt)
-			if err != nil {
-				return 0, nil, nil, err
-			}
-			currentOptions = append(currentOptions, option)
-		}
-		userOptions = append(userOptions, currentOptions...)
-
-		query = "SELECT text FROM answers WHERE question_id = $1"
-		rows, err := qr.db.QueryContext(ctx, query, req.QuizId)
-		if err != nil {
-			return 0, nil, nil, err
-		}
-
-		correctAnswers := make(map[string]bool)
-		for rows.Next() {
-			var text string
-			if err := rows.Scan(&text); err != nil {
-				rows.Close()
-				return 0, nil, nil, err
-			}
-			correctAnswers[text] = true
-		}
-		rows.Close()
-
-		if err = rows.Err(); err != nil {
-			return 0, nil, nil, err
-		}
-
-		isCorrect := true
-		if len(currentOptions) != len(correctAnswers) {
-			isCorrect = false
-		} else {
-			for _, opt := range currentOptions {
-				if !correctAnswers[opt.Text] {
-					isCorrect = false
-					break
-				}
-			}
-		}
-
-		if isCorrect {
-			score++
-		}
-	}
-	return score, userOptions, questions, nil
 }
