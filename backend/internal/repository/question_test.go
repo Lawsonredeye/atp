@@ -63,7 +63,7 @@ func TestGetRandomQuestion(t *testing.T) {
 	assert.Equal(t, createdQuestionId, int64(1))
 	createdQuestion, err := repo.GetRandomQuestion(ctx, 1)
 	assert.Nil(t, err)
-	assert.Equal(t, createdQuestion.Id, int(createdQuestionId))
+	assert.Equal(t, createdQuestion.Id, createdQuestionId)
 }
 
 func TestCreateQuestion(t *testing.T) {

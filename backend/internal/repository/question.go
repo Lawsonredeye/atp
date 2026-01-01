@@ -12,17 +12,19 @@ import (
 
 type QuestionRepository interface {
 	GetQuestionById(ctx context.Context, id int64) (*Question, error)
+	GetCorrectQuestionOptionByQuestionID(ctx context.Context, questionId int64) (*QuestionOptions, error)
 	GetRandomQuestion(ctx context.Context, subjectId int64) (*Question, error)
 	CreateQuestion(ctx context.Context, question Question) (int64, error)
 	CreateQuestionOption(ctx context.Context, option QuestionOptions) (int64, error)
 	GetQuestionOptions(ctx context.Context, questionId int64) ([]QuestionOptions, error)
+	GetQuestionOptionsById(ctx context.Context, id int64) (*QuestionOptions, error)
 	CreateAnswer(ctx context.Context, answer Answer) (int64, error)
 	GetAnswerById(ctx context.Context, id int64) (*Answer, error)
 }
 
 type Question struct {
-	Id               int       `json:"id"`
-	SubjectId        int       `json:"subject_id"`
+	Id               int64     `json:"id"`
+	SubjectId        int64     `json:"subject_id"`
 	Text             string    `json:"text"`
 	IsMultipleChoice bool      `json:"is_multiple_choice"`
 	CreatedAt        time.Time `json:"created_at"`
@@ -30,16 +32,16 @@ type Question struct {
 }
 
 type Answer struct {
-	Id         int       `json:"id"`
+	Id         int64     `json:"id"`
 	Text       string    `json:"text"`
-	QuestionId int       `json:"question_id"`
+	QuestionId int64     `json:"question_id"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type QuestionOptions struct {
-	Id         int       `json:"id"`
-	QuestionId int       `json:"question_id"`
+	Id         int64     `json:"id"`
+	QuestionId int64     `json:"question_id"`
 	Text       string    `json:"text"`
 	IsCorrect  bool      `json:"is_correct"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -119,6 +121,18 @@ func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId
 	return options, nil
 }
 
+// GetCorrectQuestionOptionByQuestionID returns the correct option for a question without returning the entire options with the question id
+func (qr *questionRepository) GetCorrectQuestionOptionByQuestionID(ctx context.Context, questionId int64) (*QuestionOptions, error) {
+	query := "SELECT id, question_id, text FROM question_options WHERE question_id = $1 AND is_correct = true"
+	row := qr.db.QueryRowContext(ctx, query, questionId)
+	var option QuestionOptions
+	err := row.Scan(&option.Id, &option.QuestionId, &option.Text)
+	if err != nil {
+		return nil, err
+	}
+	return &option, nil
+}
+
 func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answer) (int64, error) {
 	query := "INSERT INTO answers (question_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
 	res, err := qr.db.ExecContext(ctx, query, answer.QuestionId, answer.Text, answer.CreatedAt, answer.UpdatedAt)
@@ -137,8 +151,9 @@ func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answer) (
 	return res.LastInsertId()
 }
 
+// GetAnswerById returns the answers based on the selected question id.
 func (qr *questionRepository) GetAnswerById(ctx context.Context, id int64) (*Answer, error) {
-	query := "SELECT id, question_id, text FROM answers WHERE id = $1"
+	query := "SELECT id, question_id, text FROM answers WHERE question_id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)
 	var answer Answer
 	err := row.Scan(&answer.Id, &answer.QuestionId, &answer.Text)
@@ -182,6 +197,18 @@ func (qr *questionRepository) UpdateAnswerByID(ctx context.Context, answer Answe
 	return &resp, nil
 }
 
+func (qr *questionRepository) GetQuestionOptionsById(ctx context.Context, id int64) (*QuestionOptions, error) {
+	query := "SELECT id, question_id, text FROM question_options WHERE id = $1"
+	row := qr.db.QueryRowContext(ctx, query, id)
+	var option QuestionOptions
+	err := row.Scan(&option.Id, &option.QuestionId, &option.Text)
+	if err != nil {
+		return nil, err
+	}
+	return &option, nil
+}
+
+// GetAllQuestions returns all the questions created on the database.
 func (qr *questionRepository) GetAllQuestions(ctx context.Context) ([]Question, error) {
 	query := "SELECT id, subject_id, text FROM questions"
 	rows, err := qr.db.QueryContext(ctx, query)
