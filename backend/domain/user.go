@@ -31,11 +31,9 @@ var (
 )
 
 type UserStats struct {
-	UserID                 int64     `json:"user_id"`
-	TotalQuizzesTaken      int64     `json:"total_quizzes_taken"`
-	TotalCorrectAnswers    int64     `json:"total_correct_answers"`
-	TotalIncorrectAnswers  int64     `json:"total_incorrect_answers"`
-	TotalQuestionsAnswered int64     `json:"total_questions_answered"`
-	CreatedAt              time.Time `json:"created_at"`
-	UpdatedAt              time.Time `json:"updated_at"`
+	UserID                 int64 `json:"user_id"`
+	TotalQuizzesTaken      int64 `json:"total_quizzes_taken"`
+	TotalCorrectAnswers    int64 `json:"total_correct_answers"`
+	TotalIncorrectAnswers  int64 `json:"total_incorrect_answers"`
+	TotalQuestionsAnswered int64 `json:"total_questions_answered"`
 }
