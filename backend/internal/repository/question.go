@@ -20,6 +20,8 @@ type QuestionRepository interface {
 	GetQuestionOptionsById(ctx context.Context, id int64) (*QuestionOptions, error)
 	CreateAnswer(ctx context.Context, answer Answer) (int64, error)
 	GetAnswerById(ctx context.Context, id int64) (*Answer, error)
+	UpdateAnswerById(ctx context.Context, answer Answer) (*Answer, error)
+	GetAllQuestions(ctx context.Context) ([]Question, error)
 }
 
 type Question struct {
@@ -52,7 +54,7 @@ type questionRepository struct {
 	db *sql.DB
 }
 
-func NewQuestionRepository(db *sql.DB) *questionRepository {
+func NewQuestionRepository(db *sql.DB) QuestionRepository {
 	return &questionRepository{db: db}
 }
 
@@ -92,12 +94,6 @@ func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option Q
 	res, err := qr.db.ExecContext(ctx, query, option.QuestionId, option.Text, option.CreatedAt, option.UpdatedAt)
 	if err != nil {
 		return 0, err
-	}
-	if option.IsCorrect {
-		qr.CreateAnswer(ctx, Answer{QuestionId: option.QuestionId,
-			Text:      option.Text,
-			CreatedAt: option.CreatedAt,
-			UpdatedAt: option.UpdatedAt})
 	}
 	return res.LastInsertId()
 }
@@ -163,7 +159,7 @@ func (qr *questionRepository) GetAnswerById(ctx context.Context, id int64) (*Ans
 	return &answer, nil
 }
 
-func (qr *questionRepository) UpdateAnswerByID(ctx context.Context, answer Answer) (*Answer, error) {
+func (qr *questionRepository) UpdateAnswerById(ctx context.Context, answer Answer) (*Answer, error) {
 	fmt.Printf("DEBUG: Updating Answer ID: %d\n", answer.Id)
 
 	var count int

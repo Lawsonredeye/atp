@@ -168,7 +168,7 @@ func TestUpdateAnswerByID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, createdAnswer, "should have created answer")
 
-	updatedAnswer, err := repo.UpdateAnswerByID(ctx, Answer{
+	updatedAnswer, err := repo.UpdateAnswerById(ctx, Answer{
 		Id:         1,
 		QuestionId: 1,
 		Text:       "test updated",
