@@ -98,7 +98,7 @@ func TestGetOverallScoreByUserID(t *testing.T) {
 		userScore, err := ss.StoreUserScore(ctx, score)
 		assert.NoError(t, err)
 		assert.NotNil(t, userScore)
-		fmt.Printf("user inputed score: %+v\n", userScore)
+		fmt.Printf("user inputted score: %+v\n", userScore)
 	}
 
 	stats, err := ss.GetUserOverallScoreStats(ctx, userNewScore[0].UserID)
