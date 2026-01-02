@@ -106,8 +106,8 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest
 			QuestionId:      question.Id,
 			Question:        question.Text,
 			SelectedOptions: opts,
-			Answer:          answer.Text,
-			Explanation:     "",
+			Answer:          correctOption.Text,
+			Explanation:     answer.Text,
 		})
 	}
 	return result, score, nil
