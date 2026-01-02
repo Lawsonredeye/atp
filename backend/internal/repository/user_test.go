@@ -20,6 +20,7 @@ func setUpDB(t *testing.T) *sql.DB {
 	}
 	queries := []string{
 		"CREATE TABLE users (id integer primary key autoincrement, name text, email text, password_hash text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE IF NOT EXISTS scores (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id BIGINT, score BIGINT, mode VARCHAR(255), correct_answers BIGINT, incorrect_answers BIGINT, total_questions BIGINT, time_taken_seconds BIGINT, subject_id BIGINT, created_at TIMESTAMP, updated_at TIMESTAMP)",
 	}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
