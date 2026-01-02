@@ -112,3 +112,8 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest
 	}
 	return result, score, nil
 }
+
+// CalculateQuizScore takes a number of questions and a score and returns the percentage of the score.
+func (qs *quizService) CalculateQuizScore(ctx context.Context, numOfQuestions int64, score int64) int64 {
+	return score * 100 / numOfQuestions
+}

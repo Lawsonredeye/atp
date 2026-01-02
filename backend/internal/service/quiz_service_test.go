@@ -247,3 +247,52 @@ func TestSubmitQuiz(t *testing.T) {
 	assert.Equal(t, int64(1), score)
 	fmt.Println("result: ", result)
 }
+
+func TestCalculateQuizScore(t *testing.T) {
+	pool := setUpDB(t)
+	defer pool.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	qr := repository.NewQuizRepository(pool)
+	questionRepo := repository.NewQuestionRepository(pool)
+	subjectRepo := repository.NewSubjectRepository(pool)
+	qs := NewQuizService(qr, subjectRepo, questionRepo)
+	subjectId, err := subjectRepo.CreateSubject(ctx, repository.Subject{
+		Name:      "use of english",
+		UpdatedAt: time.Now(),
+		CreatedAt: time.Now(),
+	})
+	data := populateDBWithSubjectID(subjectId)
+	assert.Equal(t, int64(1), subjectId)
+	if _, err := qr.CreateMultipleQuiz(ctx, data); err != nil {
+		t.Fatal("failed to create quiz")
+	}
+	createdQuiz, err := qr.GetQuizById(ctx, 1)
+	assert.Nil(t, err)
+	fmt.Println("created quiz: ", createdQuiz)
+	quizRequest := []QuizRequest{
+		{
+			QuizId:           1,
+			IsMultipleChoice: true,
+			OptionIds:        []int64{1},
+		},
+		{
+			QuizId:           2,
+			IsMultipleChoice: true,
+			OptionIds:        []int64{2},
+		},
+		{
+			QuizId:           3,
+			IsMultipleChoice: true,
+			OptionIds:        []int64{1},
+		},
+	}
+	result, score, err := qs.SubmitQuiz(ctx, quizRequest)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(1), score)
+	fmt.Println("result: ", result)
+
+	numOfQuestions := len(quizRequest)
+	finalScore := qs.CalculateQuizScore(ctx, int64(numOfQuestions), score)
+	assert.Equal(t, int64(33), finalScore)
+}
