@@ -7,4 +7,8 @@ var (
 	ErrQuestionNotFound       = errors.New("question not found")
 	ErrQuestionOptionNotFound = errors.New("question option not found")
 	ErrQuizNotFound           = errors.New("quiz not found")
+	ErrInvalidName            = errors.New("invalid name")
+	ErrInvalidEmail           = errors.New("invalid email")
+	ErrInvalidPasswordHash    = errors.New("invalid password hash")
+	ErrInvalidUserID          = errors.New("invalid User ID")
 )

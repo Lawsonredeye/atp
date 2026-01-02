@@ -95,7 +95,7 @@ func (ur *UserRepository) DeleteUserByID(ctx context.Context, userId int64) erro
 
 // GetAllUsers gets all users from the database.
 func (ur *UserRepository) GetAllUsers(ctx context.Context) ([]domain.User, error) {
-	query := "SELECT * FROM users"
+	query := "SELECT id, name, email, created_at, updated_at FROM users"
 	rows, err := ur.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (ur *UserRepository) GetAllUsers(ctx context.Context) ([]domain.User, error
 	users := []domain.User{}
 	for rows.Next() {
 		user := domain.User{}
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
