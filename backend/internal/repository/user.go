@@ -18,6 +18,7 @@ type UserRepositoryInterface interface {
 	CreateUser(ctx context.Context, user domain.User) (*domain.User, error)
 	UpdateUserPassword(ctx context.Context, userId int64, newPassword string) error
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 }
@@ -74,6 +75,17 @@ func (ur *UserRepository) UpdateUsername(ctx context.Context, userId int64, newU
 // GetUserWithID gets a user from the database by ID.
 func (ur *UserRepository) GetUserWithID(ctx context.Context, userId int64) (*domain.User, error) {
 	query := fmt.Sprintf("SELECT * FROM users WHERE id = %d", userId)
+	row := ur.db.QueryRowContext(ctx, query)
+	user := domain.User{}
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	query := fmt.Sprintf("SELECT * FROM users WHERE email = '%s'", email)
 	row := ur.db.QueryRowContext(ctx, query)
 	user := domain.User{}
 	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)

@@ -80,6 +80,34 @@ func TestGetUserWithID(t *testing.T) {
 	assert.NotNil(t, user)
 }
 
+func TestGetUserByEmail(t *testing.T) {
+	pool := setUpDB(t)
+	defer pool.Close()
+
+	userRepo := NewUserRepository(pool)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	user, err := userRepo.CreateUser(ctx, domain.User{
+		Name:         "John Doe",
+		Email:        "john.doe@example.com",
+		PasswordHash: "password",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("created user: ", user)
+
+	user, err = userRepo.GetUserByEmail(ctx, user.Email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Nil(t, err)
+	assert.NotNil(t, user)
+}
+
 func TestUpdateUserPassword(t *testing.T) {
 	pool := setUpDB(t)
 	defer pool.Close()
