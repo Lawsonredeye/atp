@@ -13,3 +13,13 @@ HOW TO RUN
 
 1. Clone the repository
 2. docker compose up 
+
+
+SQL Tables
+
+users
+scores
+subjects
+questions
+answers
+options
