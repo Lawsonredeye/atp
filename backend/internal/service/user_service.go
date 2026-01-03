@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/lawson/otterprep/domain"
@@ -13,6 +14,7 @@ type UserServiceInterface interface {
 	CreateUser(ctx context.Context, user domain.User) error
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
+	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
 }
@@ -110,5 +112,26 @@ func (s *userService) DeleteUserByID(ctx context.Context, userId int64) error {
 		return err
 	}
 	s.logger.Println("deleted user: ", userId)
+	return nil
+}
+
+func (s *userService) UpdatePassword(ctx context.Context, userId int64, newPassword string) error {
+	if userId == 0 {
+		s.logger.Println("error updating password: ", pkg.ErrInvalidUserID)
+		return pkg.ErrInvalidUserID
+	}
+	if newPassword == "" || len(newPassword) < 6 {
+		s.logger.Println("error updating password: ", pkg.ErrInvalidPasswordHash)
+		return pkg.ErrInvalidPasswordHash
+	}
+	err := s.userRepo.UpdateUserPassword(ctx, userId, newPassword)
+	if err != nil {
+		s.logger.Println("error updating password: ", err)
+		if errors.Is(err, pkg.ErrInvalidPasswordHash) {
+			return pkg.ErrInvalidPasswordHash
+		}
+		return pkg.ErrInternalServerError
+	}
+	s.logger.Println("updated password: ", newPassword)
 	return nil
 }
