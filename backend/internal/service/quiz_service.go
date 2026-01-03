@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"time"
 
 	"github.com/lawson/otterprep/domain"
 	"github.com/lawson/otterprep/internal/repository"
@@ -20,15 +21,17 @@ type quizService struct {
 	quizRepository     repository.QuizRepository
 	subjectRepository  repository.SubjectRepository
 	questionRepository repository.QuestionRepository
+	scoreRepository    repository.ScoreRepository
 }
 
 type QuizService interface {
 	GenerateQuizBySubjectID(ctx context.Context, subjectId int64, numOfQuestions int64) ([]repository.Quiz, error)
-	SubmitQuiz(ctx context.Context, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error)
+	SubmitQuiz(ctx context.Context, userID int64, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error)
+	CalculateQuizScore(ctx context.Context, numOfQuestions int64, score int64) int64
 }
 
-func NewQuizService(quizRepository repository.QuizRepository, subjectRepository repository.SubjectRepository, questionRepository repository.QuestionRepository) *quizService {
-	return &quizService{quizRepository: quizRepository, subjectRepository: subjectRepository, questionRepository: questionRepository}
+func NewQuizService(quizRepository repository.QuizRepository, subjectRepository repository.SubjectRepository, questionRepository repository.QuestionRepository, scoreRepository repository.ScoreRepository) *quizService {
+	return &quizService{quizRepository: quizRepository, subjectRepository: subjectRepository, questionRepository: questionRepository, scoreRepository: scoreRepository}
 }
 
 // GenerateQuizBySubjectID generates a quiz based on the subject ID and number of questions
@@ -69,18 +72,27 @@ func (qs *quizService) GetQuizById(ctx context.Context, id int64) (*repository.Q
 
 // SubmitQuiz takes a list of quiz request and checks to see if the request questions
 // has the correct options selected.
-func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error) {
+func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error) {
 	score := int64(0)
+	correctAnswers := int64(0)
+	incorrectAnswers := int64(0)
 	if len(quizRequest) == 0 {
 		return nil, 0, nil
 	}
 	result := make([]domain.QuizResponse, 0)
+
+	var subjectID int64
 
 	for _, quiz := range quizRequest {
 		question, err := qs.questionRepository.GetQuestionById(ctx, quiz.QuizId)
 		if err != nil {
 			fmt.Println("error getting quiz: ", err)
 			break
+		}
+
+		// Capture subjectID from the first question found
+		if subjectID == 0 {
+			subjectID = question.SubjectId
 		}
 
 		answer, err := qs.questionRepository.GetAnswerById(ctx, quiz.QuizId)
@@ -91,9 +103,14 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest
 		if err != nil {
 			fmt.Println("error getting question options: ", err)
 		}
+
 		if slices.Contains(quiz.OptionIds, correctOption.Id) {
 			score++
+			correctAnswers++
+		} else {
+			incorrectAnswers++
 		}
+
 		opts := make([]string, 0)
 		for _, optionId := range quiz.OptionIds {
 			questionOption, err := qs.questionRepository.GetQuestionOptionsById(ctx, optionId)
@@ -110,10 +127,36 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, quizRequest []QuizRequest
 			Explanation:     answer.Text,
 		})
 	}
+
+	// Persist the score
+	_, err := qs.scoreRepository.StoreUserScore(ctx, domain.UserScore{
+		UserID:           userID,
+		Score:            score,
+		Mode:             "practice", // Default mode
+		CorrectAnswers:   correctAnswers,
+		IncorrectAnswers: incorrectAnswers,
+		TotalQuestions:   int64(len(quizRequest)),
+		TimeTakenSeconds: 0, // Not tracked yet
+		SubjectID:        subjectID,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+	})
+	if err != nil {
+		fmt.Println("error storing score: ", err)
+		// We log but maybe don't fail the request? Or should we?
+		// For MVP, logging is okay, but ideally we return error.
+		// Use ErrInternalServerError?
+		// "SubmitQuiz" signature returns error. Let's return error.
+		return result, score, err
+	}
+
 	return result, score, nil
 }
 
 // CalculateQuizScore takes a number of questions and a score and returns the percentage of the score.
 func (qs *quizService) CalculateQuizScore(ctx context.Context, numOfQuestions int64, score int64) int64 {
+	if numOfQuestions == 0 {
+		return 0
+	}
 	return score * 100 / numOfQuestions
 }

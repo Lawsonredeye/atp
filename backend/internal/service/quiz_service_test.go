@@ -139,6 +139,7 @@ func setUpDB(t *testing.T) *sql.DB {
 		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, text text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE subjects (id integer primary key autoincrement, name text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE users (id integer primary key autoincrement, name text, email text, password_hash text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE scores (id integer primary key autoincrement, user_id integer, score integer, mode text, correct_answers integer, incorrect_answers integer, total_questions integer, time_taken_seconds integer, subject_id integer, created_at timestamp, updated_at timestamp)",
 	}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
@@ -159,7 +160,8 @@ func TestGenerateQuizBySubjectID(t *testing.T) {
 	qr := repository.NewQuizRepository(pool)
 	questionRepo := repository.NewQuestionRepository(pool)
 	subjectRepo := repository.NewSubjectRepository(pool)
-	qs := NewQuizService(qr, subjectRepo, questionRepo)
+	scoreRepo := repository.NewScoreRepository(pool)
+	qs := NewQuizService(qr, subjectRepo, questionRepo, scoreRepo)
 
 	subjectId, err := subjectRepo.CreateSubject(ctx, repository.Subject{
 		Name: "use of english",
@@ -198,7 +200,8 @@ func TestSubmitQuiz(t *testing.T) {
 	qr := repository.NewQuizRepository(pool)
 	questionRepo := repository.NewQuestionRepository(pool)
 	subjectRepo := repository.NewSubjectRepository(pool)
-	qs := NewQuizService(qr, subjectRepo, questionRepo)
+	scoreRepo := repository.NewScoreRepository(pool)
+	qs := NewQuizService(qr, subjectRepo, questionRepo, scoreRepo)
 
 	subjectId, err := subjectRepo.CreateSubject(ctx, repository.Subject{
 		Name: "use of english",
@@ -243,10 +246,19 @@ func TestSubmitQuiz(t *testing.T) {
 			OptionIds:        []int64{1},
 		},
 	}
-	result, score, err := qs.SubmitQuiz(ctx, quizRequest)
+	userID := int64(1)
+	result, score, err := qs.SubmitQuiz(ctx, userID, quizRequest)
 	assert.Nil(t, err)
 	assert.Equal(t, int64(1), score)
 	fmt.Println("result: ", result)
+
+	// Verify score is saved
+	scoreStats, err := scoreRepo.GetUserOverallScoreStats(ctx, userID)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(3), scoreStats.TotalQuestionsAnswered)
+	assert.Equal(t, int64(1), scoreStats.TotalCorrectAnswers)
+	assert.Equal(t, int64(2), scoreStats.TotalIncorrectAnswers)
+	fmt.Printf("user score stats: %+v\n", scoreStats)
 }
 
 func TestCalculateQuizScore(t *testing.T) {
@@ -257,7 +269,8 @@ func TestCalculateQuizScore(t *testing.T) {
 	qr := repository.NewQuizRepository(pool)
 	questionRepo := repository.NewQuestionRepository(pool)
 	subjectRepo := repository.NewSubjectRepository(pool)
-	qs := NewQuizService(qr, subjectRepo, questionRepo)
+	scoreRepo := repository.NewScoreRepository(pool)
+	qs := NewQuizService(qr, subjectRepo, questionRepo, scoreRepo)
 	subjectId, err := subjectRepo.CreateSubject(ctx, repository.Subject{
 		Name:      "use of english",
 		UpdatedAt: time.Now(),
@@ -288,7 +301,8 @@ func TestCalculateQuizScore(t *testing.T) {
 			OptionIds:        []int64{1},
 		},
 	}
-	result, score, err := qs.SubmitQuiz(ctx, quizRequest)
+	userID := int64(1)
+	result, score, err := qs.SubmitQuiz(ctx, userID, quizRequest)
 	assert.Nil(t, err)
 	assert.Equal(t, int64(1), score)
 	fmt.Println("result: ", result)
