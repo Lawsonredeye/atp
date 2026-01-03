@@ -14,4 +14,6 @@ var (
 	ErrInternalServerError        = errors.New("internal server error")
 	ErrQuestionTextNotFound       = errors.New("invalid / empty question text")
 	ErrQuestionOptionTextNotFound = errors.New("invalid / empty question option text")
+	ErrSubjectNameNotFound        = errors.New("invalid / empty subject name")
+	ErrSubjectWithNameExists      = errors.New("subject with name already exists")
 )

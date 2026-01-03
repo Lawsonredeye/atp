@@ -22,6 +22,7 @@ type QuestionRepository interface {
 	GetAnswerById(ctx context.Context, id int64) (*Answer, error)
 	UpdateAnswerById(ctx context.Context, answer Answer) (*Answer, error)
 	GetAllQuestions(ctx context.Context) ([]Question, error)
+	DeleteQuestionById(ctx context.Context, id int64) error
 }
 
 type Question struct {
@@ -228,4 +229,22 @@ func (qr *questionRepository) GetAllQuestions(ctx context.Context) ([]Question, 
 	}
 	fmt.Println("all questions:", len(questions))
 	return questions, nil
+}
+
+// DeleteQuestionById deletes a question and its associated options and answers.
+func (qr *questionRepository) DeleteQuestionById(ctx context.Context, id int64) error {
+	query := "DELETE FROM questions WHERE id = $1"
+	_, err := qr.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	_, err = qr.db.ExecContext(ctx, "DELETE FROM question_options WHERE question_id = $1", id)
+	if err != nil {
+		return err
+	}
+	_, err = qr.db.ExecContext(ctx, "DELETE FROM answers WHERE question_id = $1", id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

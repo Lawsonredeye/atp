@@ -91,6 +91,7 @@ func (qs *questionService) CreateQuestion(ctx context.Context, subjectId int64, 
 // It returns the id of the created question option and an error if any.
 func (qs *questionService) CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error) {
 	if questionOption.QuestionId == 0 {
+		qs.logger.Println("Question id is 0. Proceeding to return error.")
 		return 0, pkg.ErrQuestionNotFound
 	}
 	qs.logger.Println("Successfully created question option. Proceeding to return id.")
@@ -155,11 +156,12 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 			if option == question.Answer {
 				isCorrect = true
 			}
+			now := time.Now()
 			_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
 				QuestionId: id,
 				Text:       option,
-				CreatedAt:  time.Now(),
-				UpdatedAt:  time.Now(),
+				CreatedAt:  now,
+				UpdatedAt:  now,
 				IsCorrect:  isCorrect,
 			})
 			if err != nil {
@@ -167,11 +169,12 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 				break
 			}
 		}
+		now := time.Now()
 		_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answer{
 			QuestionId: id,
 			Text:       question.Explanation,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			CreatedAt:  now,
+			UpdatedAt:  now,
 		})
 		if err != nil {
 			qs.logger.Println("Failed to create answer: ", err)
@@ -180,4 +183,67 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 	}
 	qs.logger.Println("Successfully created questions")
 	return nil
+}
+
+// DeleteQuestionById deletes a question by id.
+func (qs *questionService) DeleteQuestionById(ctx context.Context, id int64) error {
+	if id > 1 {
+		qs.logger.Println("Question id is greater than 1. Proceeding to delete question.")
+		return pkg.ErrQuestionNotFound
+	}
+	return qs.questionRepository.DeleteQuestionById(ctx, id)
+}
+
+// CreateSubject creates a subject.
+func (qs *questionService) CreateSubject(ctx context.Context, subjectName string) (int64, error) {
+	if subjectName == "" {
+		qs.logger.Println("Subject name is empty. Proceeding to return error.")
+		return 0, pkg.ErrSubjectNameNotFound
+	}
+	// check if subject already exists
+	subject, err := qs.GetSubjectByName(ctx, subjectName)
+	if err == nil {
+		qs.logger.Println("Subject already exists. Proceeding to return error.")
+		return subject.Id, pkg.ErrSubjectWithNameExists
+	}
+	now := time.Now()
+	subjectId, err := qs.subjectRepository.CreateSubject(ctx, repository.Subject{
+		Name:      subjectName,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+	if err != nil {
+		qs.logger.Println("Failed to create subject: ", err)
+		return 0, err
+	}
+	qs.logger.Println("Successfully created subject. Proceeding to return id.")
+	return subjectId, nil
+}
+
+// GetSubjectByName gets a subject by name from the subject repository.
+func (qs *questionService) GetSubjectByName(ctx context.Context, subjectName string) (*repository.Subject, error) {
+	if subjectName == "" {
+		qs.logger.Println("Subject name is empty. Proceeding to return error.")
+		return nil, pkg.ErrSubjectNameNotFound
+	}
+	qs.logger.Println("Successfully got subject by name. Proceeding to get subject.")
+	result, err := qs.subjectRepository.GetSubjectByName(ctx, subjectName)
+	if err != nil {
+		qs.logger.Println("Failed to get subject by name: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got subject by name. Proceeding to return result.")
+	return result, nil
+}
+
+// GetSubjects gets all subjects from the subject repository.
+func (qs *questionService) GetSubjects(ctx context.Context) ([]repository.Subject, error) {
+	qs.logger.Println("Successfully got subjects. Proceeding to get subjects.")
+	result, err := qs.subjectRepository.GetSubjects(ctx)
+	if err != nil {
+		qs.logger.Println("Failed to get subjects: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got subjects. Proceeding to return result.")
+	return result, nil
 }
