@@ -11,4 +11,5 @@ var (
 	ErrInvalidEmail           = errors.New("invalid email")
 	ErrInvalidPasswordHash    = errors.New("invalid password hash")
 	ErrInvalidUserID          = errors.New("invalid User ID")
+	ErrInternalServerError    = errors.New("internal server error")
 )
