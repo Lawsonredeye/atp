@@ -1,0 +1,183 @@
+package service
+
+import (
+	"context"
+	"log"
+	"time"
+
+	"github.com/lawson/otterprep/domain"
+	"github.com/lawson/otterprep/internal/repository"
+	"github.com/lawson/otterprep/pkg"
+)
+
+type QuestionService interface {
+	CreateQuestion(ctx context.Context, question repository.Question) (int64, error)
+	CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error)
+	GetQuestionById(ctx context.Context, id int64) (*repository.Question, error)
+	GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error)
+}
+
+type questionService struct {
+	questionRepository repository.QuestionRepository
+	subjectRepository  repository.SubjectRepository
+	logger             *log.Logger
+}
+
+func NewQuestionService(questionRepository repository.QuestionRepository, subjectRepository repository.SubjectRepository, logger *log.Logger) *questionService {
+	return &questionService{questionRepository: questionRepository, subjectRepository: subjectRepository, logger: logger}
+}
+
+// CreateQuestion creates a new question and its options and answer.
+// It returns the id of the created question and an error if any.
+func (qs *questionService) CreateQuestion(ctx context.Context, subjectId int64, question domain.QuestionsData) (int64, error) {
+
+	if question.Name == "" {
+		qs.logger.Println("Question name is empty. Proceeding to return error.")
+		return 0, pkg.ErrQuestionTextNotFound
+	}
+
+	if subjectId == 0 {
+		qs.logger.Println("Subject id is 0. Proceeding to return error.")
+		return 0, pkg.ErrSubjectNotFound
+	}
+	qs.logger.Println("check if subject exists.")
+	_, err := qs.subjectRepository.GetSubjectById(ctx, subjectId)
+	if err != nil {
+		qs.logger.Println("Failed to get subject by id: ", err)
+		return 0, err
+	}
+	qs.logger.Println("Successfully got subject by id. Proceeding to create question.")
+
+	id, err := qs.questionRepository.CreateQuestion(ctx, repository.Question{
+		SubjectId: subjectId,
+		Text:      question.Name,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		qs.logger.Println("Failed to create question: ", err)
+		return 0, err
+	}
+	qs.logger.Println("Successfully created question. Proceeding to create options.")
+	for _, option := range question.Options {
+		_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
+			QuestionId: id,
+			Text:       option,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+			IsCorrect:  option == question.Answer,
+		})
+		if err != nil {
+			qs.logger.Println("Failed to create question option: ", err)
+			return 0, err
+		}
+	}
+	qs.logger.Println("Successfully created question options. Proceeding to create answer.")
+	_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answer{
+		QuestionId: id,
+		Text:       question.Explanation,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	})
+	if err != nil {
+		qs.logger.Println("Failed to create answer: ", err)
+		return 0, err
+	}
+	qs.logger.Println("Successfully created answer. Proceeding to return id.")
+	return id, nil
+}
+
+// CreateQuestionOption creates a question option.
+// It returns the id of the created question option and an error if any.
+func (qs *questionService) CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error) {
+	if questionOption.QuestionId == 0 {
+		return 0, pkg.ErrQuestionNotFound
+	}
+	qs.logger.Println("Successfully created question option. Proceeding to return id.")
+	result, err := qs.questionRepository.CreateQuestionOption(ctx, questionOption)
+	if err != nil {
+		qs.logger.Println("Failed to create question option: ", err)
+		return 0, err
+	}
+	qs.logger.Println("Successfully created question option. Proceeding to return id.")
+	return result, nil
+}
+
+// GetQuestionById gets a question by id.
+// It returns the question and an error if any.
+func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*repository.Question, error) {
+	if id == 0 {
+		qs.logger.Println("Question id is 0. Proceeding to return error.")
+		return nil, pkg.ErrQuestionNotFound
+	}
+	qs.logger.Println("Successfully got question by id. Proceeding to get question.")
+	result, err := qs.questionRepository.GetQuestionById(ctx, id)
+	if err != nil {
+		qs.logger.Println("Failed to get question by id: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got question by id. Proceeding to return result.")
+	return result, nil
+}
+
+// GetQuestionOptions gets the options of a question by id.
+// It returns the options and an error if any.
+func (qs *questionService) GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error) {
+	if questionId == 0 {
+		qs.logger.Println("Question id is 0. Proceeding to return error.")
+		return nil, pkg.ErrQuestionNotFound
+	}
+	qs.logger.Println("Successfully got question options. Proceeding to get question options.")
+	result, err := qs.questionRepository.GetQuestionOptions(ctx, questionId)
+	if err != nil {
+		qs.logger.Println("Failed to get question options: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got question options. Proceeding to return result.")
+	return result, nil
+}
+
+// CreateMultipleQuestionBySubjectID creates multiple questions and their options and answers.
+// It returns an error if any.
+func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context, subjectId int64, questions []domain.QuestionsData) error {
+	if subjectId == 0 {
+		qs.logger.Println("Subject id is 0. Proceeding to return error.")
+		return pkg.ErrSubjectNotFound
+	}
+	for _, question := range questions {
+		id, err := qs.CreateQuestion(ctx, subjectId, question)
+		if err != nil {
+			qs.logger.Println("Failed to create question: ", err)
+			break
+		}
+		for _, option := range question.Options {
+			isCorrect := false
+			if option == question.Answer {
+				isCorrect = true
+			}
+			_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
+				QuestionId: id,
+				Text:       option,
+				CreatedAt:  time.Now(),
+				UpdatedAt:  time.Now(),
+				IsCorrect:  isCorrect,
+			})
+			if err != nil {
+				qs.logger.Println("Failed to create question option: ", err)
+				break
+			}
+		}
+		_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answer{
+			QuestionId: id,
+			Text:       question.Explanation,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		})
+		if err != nil {
+			qs.logger.Println("Failed to create answer: ", err)
+			break
+		}
+	}
+	qs.logger.Println("Successfully created questions")
+	return nil
+}
