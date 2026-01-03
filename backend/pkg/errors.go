@@ -16,4 +16,6 @@ var (
 	ErrQuestionOptionTextNotFound = errors.New("invalid / empty question option text")
 	ErrSubjectNameNotFound        = errors.New("invalid / empty subject name")
 	ErrSubjectWithNameExists      = errors.New("subject with name already exists")
+	ErrUserNotFound               = errors.New("user not found")
+	ErrInvalidRole                = errors.New("invalid role")
 )
