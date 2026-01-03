@@ -15,7 +15,7 @@ type UserRepository struct {
 }
 
 type UserRepositoryInterface interface {
-	CreateUser(ctx context.Context, user domain.User) (domain.User, error)
+	CreateUser(ctx context.Context, user domain.User) (*domain.User, error)
 	UpdateUserPassword(ctx context.Context, userId int64, newPassword string) error
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
