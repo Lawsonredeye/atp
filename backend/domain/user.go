@@ -25,11 +25,19 @@ type UserScore struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+// User roles
+var (
+	UserAdmin = "admin"
+	UserUser  = "user"
+)
+
+// Quiz modes
 var (
 	ModeSingle   = "single"
 	ModeMultiple = "multiple"
 )
 
+// User stats
 type UserStats struct {
 	UserID                 int64 `json:"user_id"`
 	TotalQuizzesTaken      int64 `json:"total_quizzes_taken"`

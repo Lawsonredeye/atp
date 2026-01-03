@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/lawson/otterprep/domain"
 	"github.com/lawson/otterprep/internal/repository"
@@ -11,12 +12,13 @@ import (
 )
 
 type UserServiceInterface interface {
-	CreateUser(ctx context.Context, user domain.User) error
+	CreateUserAccount(ctx context.Context, user domain.User) (*domain.User, error)
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
+	Login(ctx context.Context, email string, password string) (*domain.User, error)
 }
 
 type userService struct {
@@ -31,7 +33,7 @@ func NewUserService(userRepo repository.UserRepository, logger *log.Logger) *use
 	}
 }
 
-func (s *userService) CreateUser(ctx context.Context, user domain.User) (*domain.User, error) {
+func (s *userService) CreateUserAccount(ctx context.Context, user domain.User, role string) (*domain.User, error) {
 	if user.Name == "" {
 		s.logger.Println("error creating user: ", pkg.ErrInvalidName)
 		return nil, pkg.ErrInvalidName
@@ -40,13 +42,21 @@ func (s *userService) CreateUser(ctx context.Context, user domain.User) (*domain
 		s.logger.Println("error creating user: ", pkg.ErrInvalidEmail)
 		return nil, pkg.ErrInvalidEmail
 	}
-	if user.PasswordHash == "" {
+	if user.PasswordHash == "" { // the len of the user password should be >= 6
 		s.logger.Println("error creating user: ", pkg.ErrInvalidPasswordHash)
 		return nil, pkg.ErrInvalidPasswordHash
 	}
 	createdUser, err := s.userRepo.CreateUser(ctx, user)
 	if err != nil {
 		s.logger.Println("error creating user: ", err)
+		return nil, err
+	}
+	if role == "" {
+		s.logger.Println("error creating user: ", pkg.ErrInvalidRole, "assigning a user role")
+		role = domain.UserUser
+	}
+	if err := s.userRepo.CreateUserRoles(ctx, createdUser.ID, strings.ToLower(role)); err != nil {
+		s.logger.Println("error creating user roles: ", err)
 		return nil, err
 	}
 	createdUser.PasswordHash = ""
@@ -134,4 +144,22 @@ func (s *userService) UpdatePassword(ctx context.Context, userId int64, newPassw
 	}
 	s.logger.Println("updated password: ", newPassword)
 	return nil
+}
+
+func (s *userService) Login(ctx context.Context, email string, password string) (*domain.User, error) {
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Println("error getting user: ", err)
+		return nil, err
+	}
+	if user == nil {
+		s.logger.Println("user not found")
+		return nil, pkg.ErrUserNotFound
+	}
+	if !pkg.CheckPasswordHash(password, user.PasswordHash) {
+		s.logger.Println("password does not match")
+		return nil, pkg.ErrInvalidPasswordHash
+	}
+	s.logger.Println("user logged in: ", user)
+	return user, nil
 }

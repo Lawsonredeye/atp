@@ -124,3 +124,33 @@ func (ur *UserRepository) GetAllUsers(ctx context.Context) ([]domain.User, error
 	}
 	return users, nil
 }
+
+// CreateUserRoles creates a new user role in the database.
+func (ur *UserRepository) CreateUserRoles(ctx context.Context, userId int64, role string) error {
+	query := fmt.Sprintf("INSERT INTO user_roles (user_id, role) VALUES (%d, '%s')", userId, role)
+	_, err := ur.db.ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetUserRoles gets all user roles from the database by user ID.
+func (ur *UserRepository) GetUserRoles(ctx context.Context, userId int64) ([]string, error) {
+	query := fmt.Sprintf("SELECT role FROM user_roles WHERE user_id = %d", userId)
+	rows, err := ur.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	roles := []string{}
+	for rows.Next() {
+		role := ""
+		err := rows.Scan(&role)
+		if err != nil {
+			return nil, err
+		}
+		roles = append(roles, role)
+	}
+	return roles, nil
+}

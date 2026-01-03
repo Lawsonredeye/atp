@@ -29,7 +29,7 @@ func TestUserServiceCreateUser(t *testing.T) {
 		PasswordHash: "test",
 	}
 
-	createdUser, err := userService.CreateUser(ctx, user)
+	createdUser, err := userService.CreateUserAccount(ctx, user, "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestUserServiceGetUserWithID(t *testing.T) {
 		PasswordHash: "test",
 	}
 
-	createdUser, err := userService.CreateUser(ctx, newUser)
+	createdUser, err := userService.CreateUserAccount(ctx, newUser, "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestUserServiceUpdateUsername(t *testing.T) {
 		PasswordHash: "user101",
 	}
 
-	createdUser, err := userService.CreateUser(ctx, newUser)
+	createdUser, err := userService.CreateUserAccount(ctx, newUser, domain.UserUser)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func TestUserServiceUpdatePassword(t *testing.T) {
 		PasswordHash: "user101",
 	}
 
-	createdUser, err := userService.CreateUser(ctx, newUser)
+	createdUser, err := userService.CreateUserAccount(ctx, newUser, domain.UserUser)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +165,7 @@ func TestUserServiceDeleteUserByID(t *testing.T) {
 		PasswordHash: "user101",
 	}
 
-	createdUser, err := userService.CreateUser(ctx, newUser)
+	createdUser, err := userService.CreateUserAccount(ctx, newUser, domain.UserUser)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,7 +203,7 @@ func TestUserServiceGetAllUsers(t *testing.T) {
 	}
 
 	for _, user := range newUser {
-		createdUser, err := userService.CreateUser(ctx, user)
+		createdUser, err := userService.CreateUserAccount(ctx, user, domain.UserUser)
 		if err != nil {
 			t.Fatal(err)
 		}
