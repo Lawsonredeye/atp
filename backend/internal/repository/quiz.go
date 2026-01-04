@@ -9,7 +9,7 @@ import (
 )
 
 type Quiz struct {
-	Text             string
+	Question         string
 	SubjectId        int64
 	IsMultipleChoice bool `json:"is_multiple_choice"`
 	QuestionOptions  []QuestionOptions
@@ -44,8 +44,8 @@ func (qr *quizRepository) CreateQuiz(ctx context.Context, quiz Quiz) (int64, err
 		return 0, errors.New("subject not found")
 	}
 
-	query = "INSERT INTO questions (subject_id, text, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-	res, err := qr.db.ExecContext(ctx, query, id, quiz.Text, quiz.IsMultipleChoice, quiz.CreatedAt, quiz.UpdatedAt)
+	query = "INSERT INTO questions (subject_id, question, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+	res, err := qr.db.ExecContext(ctx, query, id, quiz.Question, quiz.IsMultipleChoice, quiz.CreatedAt, quiz.UpdatedAt)
 	if err != nil {
 		return 0, err
 	}
@@ -55,13 +55,13 @@ func (qr *quizRepository) CreateQuiz(ctx context.Context, quiz Quiz) (int64, err
 		return 0, err
 	}
 	for _, option := range quiz.QuestionOptions {
-		query = "INSERT INTO question_options (question_id, text, is_correct, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-		if _, err := qr.db.ExecContext(ctx, query, createdId, option.Text, option.IsCorrect, option.CreatedAt, option.UpdatedAt); err != nil {
+		query = "INSERT INTO question_options (question_id, option, is_correct, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+		if _, err := qr.db.ExecContext(ctx, query, createdId, option.Option, option.IsCorrect, option.CreatedAt, option.UpdatedAt); err != nil {
 			return 0, err
 		}
 		if option.IsCorrect {
-			query = "INSERT INTO answers (question_id, text, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-			if _, err := qr.db.ExecContext(ctx, query, createdId, option.Text, option.CreatedAt, option.UpdatedAt); err != nil {
+			query = "INSERT INTO answers (question_id, answer, created_at, updated_at) VALUES ($1, $2, $3, $4)"
+			if _, err := qr.db.ExecContext(ctx, query, createdId, option.Option, option.CreatedAt, option.UpdatedAt); err != nil {
 				return 0, err
 			}
 		}
@@ -82,14 +82,14 @@ func (qr *quizRepository) CreateMultipleQuiz(ctx context.Context, quiz []Quiz) (
 
 // GetQuizById This generates a quick quiz question from db
 func (qr *quizRepository) GetQuizById(ctx context.Context, id int64) (*Quiz, error) {
-	query := "SELECT text, subject_id, is_multiple_choice, created_at, updated_at FROM questions WHERE id = $1"
+	query := "SELECT question, subject_id, is_multiple_choice, created_at, updated_at FROM questions WHERE id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)
 	var quiz Quiz
-	err := row.Scan(&quiz.Text, &quiz.SubjectId, &quiz.IsMultipleChoice, &quiz.CreatedAt, &quiz.UpdatedAt)
+	err := row.Scan(&quiz.Question, &quiz.SubjectId, &quiz.IsMultipleChoice, &quiz.CreatedAt, &quiz.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
-	query = "SELECT id, question_id, text, is_correct, created_at, updated_at FROM question_options WHERE question_id = $1"
+	query = "SELECT id, question_id, option, is_correct, created_at, updated_at FROM question_options WHERE question_id = $1"
 	rows, err := qr.db.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (qr *quizRepository) GetQuizById(ctx context.Context, id int64) (*Quiz, err
 	defer rows.Close()
 	for rows.Next() {
 		var option QuestionOptions
-		err := rows.Scan(&option.Id, &option.QuestionId, &option.Text, &option.IsCorrect, &option.CreatedAt, &option.UpdatedAt)
+		err := rows.Scan(&option.Id, &option.QuestionId, &option.Option, &option.IsCorrect, &option.CreatedAt, &option.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

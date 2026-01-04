@@ -54,7 +54,7 @@ func (qs *quizService) GenerateQuizBySubjectID(ctx context.Context, subjectId in
 		}
 
 		quiz = append(quiz, repository.Quiz{
-			Text:             question.Text,
+			Question:         question.Question,
 			SubjectId:        question.SubjectId,
 			IsMultipleChoice: question.IsMultipleChoice,
 			QuestionOptions:  questionOption,
@@ -117,14 +117,14 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest
 			if err != nil {
 				fmt.Println("error getting question options: ", err)
 			}
-			opts = append(opts, questionOption.Text)
+			opts = append(opts, questionOption.Option)
 		}
 		result = append(result, domain.QuizResponse{
 			QuestionId:      question.Id,
-			Question:        question.Text,
+			Question:        question.Question,
 			SelectedOptions: opts,
-			Answer:          correctOption.Text,
-			Explanation:     answer.Text,
+			Answer:          correctOption.Option,
+			Explanation:     answer.Answer,
 		})
 	}
 
