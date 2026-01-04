@@ -140,6 +140,7 @@ func setUpDB(t *testing.T) *sql.DB {
 		"CREATE TABLE subjects (id integer primary key autoincrement, name text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE users (id integer primary key autoincrement, name text, email text, password_hash text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE scores (id integer primary key autoincrement, user_id integer, score integer, mode text, correct_answers integer, incorrect_answers integer, total_questions integer, time_taken_seconds integer, subject_id integer, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE user_roles (id integer primary key autoincrement, user_id integer, role text, created_at timestamp, updated_at timestamp)",
 	}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {

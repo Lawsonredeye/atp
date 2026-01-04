@@ -106,7 +106,7 @@ func (qs *questionService) CreateQuestionOption(ctx context.Context, questionOpt
 
 // GetQuestionById gets a question by id.
 // It returns the question and an error if any.
-func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*repository.Question, error) {
+func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*domain.Question, error) {
 	if id == 0 {
 		qs.logger.Println("Question id is 0. Proceeding to return error.")
 		return nil, pkg.ErrQuestionNotFound
@@ -117,8 +117,25 @@ func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*repo
 		qs.logger.Println("Failed to get question by id: ", err)
 		return nil, err
 	}
-	qs.logger.Println("Successfully got question by id. Proceeding to return result.")
-	return result, nil
+	qs.logger.Println("Successfully got question by id. Proceeding to get the question options.")
+	questionOptions, err := qs.questionRepository.GetQuestionOptions(ctx, id)
+	if err != nil {
+		qs.logger.Println("Failed to get question options: ", err)
+		return nil, err
+	}
+	options := make([]string, len(questionOptions))
+	for i, option := range questionOptions {
+		options[i] = option.Text
+	}
+	domainQuestion := domain.Question{
+		ID:          result.Id,
+		Text:        result.Text,
+		Option:      options,
+		Answer:      "",
+		Explanation: "",
+	}
+	qs.logger.Println("Successfully got question options. Proceeding to return result.")
+	return &domainQuestion, nil
 }
 
 // GetQuestionOptions gets the options of a question by id.

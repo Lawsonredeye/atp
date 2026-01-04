@@ -198,3 +198,40 @@ func TestGetSubjects(t *testing.T) {
 	assert.Equal(t, int64(1), subjects[0].Id)
 	fmt.Printf("subjects data: %+v\n", subjects)
 }
+
+func TestGetQuestionById(t *testing.T) {
+	pool := setUpDB(t)
+	defer pool.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	questionRepository := repository.NewQuestionRepository(pool)
+	subjectRepository := repository.NewSubjectRepository(pool)
+	logger := log.New(os.Stdout, "questionService: ", log.LstdFlags)
+	questionService := NewQuestionService(questionRepository, subjectRepository, logger)
+
+	subjectId, err := subjectRepository.CreateSubject(ctx, repository.Subject{
+		Name: "General Knowledge",
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, int64(1), subjectId)
+
+	newQuestion := domain.QuestionsData{
+		Name:        "What is the capital of France?",
+		Options:     []string{"Paris", "London", "Berlin", "Madrid"},
+		Answer:      "Paris",
+		Explanation: "Paris is the capital of France.",
+	}
+
+	id, err := questionService.CreateQuestion(ctx, subjectId, newQuestion)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(1), id)
+
+	question, err := questionService.GetQuestionById(ctx, id)
+	assert.Nil(t, err)
+	assert.Equal(t, question.Text, "What is the capital of France?")
+	assert.Equal(t, question.Option, []string{"Paris", "London", "Berlin", "Madrid"})
+	assert.Equal(t, question.Answer, "")
+	assert.Equal(t, question.Explanation, "")
+	fmt.Printf("question data: %+v\n", question)
+}
