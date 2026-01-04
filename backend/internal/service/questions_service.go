@@ -13,6 +13,8 @@ import (
 type QuestionService interface {
 	CreateQuestion(ctx context.Context, question repository.Questions) (int64, error)
 	CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error)
+	CreateMultipleQuestionBySubjectID(ctx context.Context, subjectId int64, questions []domain.QuestionsData) (int64, error)
+
 	GetQuestionById(ctx context.Context, id int64) (*repository.Questions, error)
 	GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error)
 }
