@@ -11,9 +11,9 @@ import (
 )
 
 type QuestionService interface {
-	CreateQuestion(ctx context.Context, question repository.Question) (int64, error)
+	CreateQuestion(ctx context.Context, question repository.Questions) (int64, error)
 	CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error)
-	GetQuestionById(ctx context.Context, id int64) (*repository.Question, error)
+	GetQuestionById(ctx context.Context, id int64) (*repository.Questions, error)
 	GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error)
 }
 
@@ -48,9 +48,9 @@ func (qs *questionService) CreateQuestion(ctx context.Context, subjectId int64, 
 	}
 	qs.logger.Println("Successfully got subject by id. Proceeding to create question.")
 
-	id, err := qs.questionRepository.CreateQuestion(ctx, repository.Question{
+	id, err := qs.questionRepository.CreateQuestion(ctx, repository.Questions{
 		SubjectId: subjectId,
-		Text:      question.Name,
+		Question:  question.Name,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
@@ -62,7 +62,7 @@ func (qs *questionService) CreateQuestion(ctx context.Context, subjectId int64, 
 	for _, option := range question.Options {
 		_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
 			QuestionId: id,
-			Text:       option,
+			Option:     option,
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 			IsCorrect:  option == question.Answer,
@@ -73,9 +73,9 @@ func (qs *questionService) CreateQuestion(ctx context.Context, subjectId int64, 
 		}
 	}
 	qs.logger.Println("Successfully created question options. Proceeding to create answer.")
-	_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answer{
+	_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answers{
 		QuestionId: id,
-		Text:       question.Explanation,
+		Answer:     question.Explanation,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
@@ -125,11 +125,11 @@ func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*doma
 	}
 	options := make([]string, len(questionOptions))
 	for i, option := range questionOptions {
-		options[i] = option.Text
+		options[i] = option.Option
 	}
 	domainQuestion := domain.Question{
 		ID:          result.Id,
-		Text:        result.Text,
+		Text:        result.Question,
 		Option:      options,
 		Answer:      "",
 		Explanation: "",
@@ -176,7 +176,7 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 			now := time.Now()
 			_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
 				QuestionId: id,
-				Text:       option,
+				Option:     option,
 				CreatedAt:  now,
 				UpdatedAt:  now,
 				IsCorrect:  isCorrect,
@@ -187,9 +187,9 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 			}
 		}
 		now := time.Now()
-		_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answer{
+		_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answers{
 			QuestionId: id,
-			Text:       question.Explanation,
+			Answer:     question.Explanation,
 			CreatedAt:  now,
 			UpdatedAt:  now,
 		})

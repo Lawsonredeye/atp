@@ -17,9 +17,9 @@ func setUP(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	queries := []string{
-		"CREATE TABLE question_options (id integer primary key autoincrement, question_id integer, text text, is_correct boolean, created_at timestamp, updated_at timestamp)",
-		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, text text, is_multiple_choice boolean, created_at timestamp, updated_at timestamp)",
-		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, text text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE question_options (id integer primary key autoincrement, question_id integer, option text, is_correct boolean, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, question text, is_multiple_choice boolean, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, answer text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE subjects (id integer primary key autoincrement, name text, created_at timestamp, updated_at timestamp)",
 	}
 	for _, query := range queries {
@@ -36,9 +36,9 @@ func TestGetQuestionById(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	createdQuestionId, err := repo.CreateQuestion(ctx, Question{
+	createdQuestionId, err := repo.CreateQuestion(ctx, Questions{
 		SubjectId:        1,
-		Text:             "test",
+		Question:         "test",
 		IsMultipleChoice: false,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
@@ -52,9 +52,9 @@ func TestGetRandomQuestion(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	createdQuestionId, err := repo.CreateQuestion(ctx, Question{
+	createdQuestionId, err := repo.CreateQuestion(ctx, Questions{
 		SubjectId:        1,
-		Text:             "test",
+		Question:         "test",
 		IsMultipleChoice: false,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
@@ -71,9 +71,9 @@ func TestCreateQuestion(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	id, err := repo.CreateQuestion(ctx, Question{
+	id, err := repo.CreateQuestion(ctx, Questions{
 		SubjectId:        1,
-		Text:             "test",
+		Question:         "test",
 		IsMultipleChoice: false,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
@@ -89,7 +89,7 @@ func TestCreateQuestionOption(t *testing.T) {
 	defer cancel()
 	createdOptionId, err := repo.CreateQuestionOption(ctx, QuestionOptions{
 		QuestionId: 1,
-		Text:       "test",
+		Option:     "test",
 		IsCorrect:  true,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
@@ -105,7 +105,7 @@ func TestGetQuestionOptions(t *testing.T) {
 	defer cancel()
 	_, err := repo.CreateQuestionOption(ctx, QuestionOptions{
 		QuestionId: 1,
-		Text:       "test",
+		Option:     "test",
 		IsCorrect:  true,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
@@ -121,9 +121,9 @@ func TestCreateAnswer(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answers{
 		QuestionId: 1,
-		Text:       "test",
+		Answer:     "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
@@ -136,9 +136,9 @@ func TestGetAnswerById(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answers{
 		QuestionId: 1,
-		Text:       "test",
+		Answer:     "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
@@ -155,9 +155,9 @@ func TestUpdateAnswerByID(t *testing.T) {
 	repo := NewQuestionRepository(pool)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	createdOptionId, err := repo.CreateAnswer(ctx, Answer{
+	createdOptionId, err := repo.CreateAnswer(ctx, Answers{
 		QuestionId: 1,
-		Text:       "test",
+		Answer:     "test",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
@@ -168,10 +168,10 @@ func TestUpdateAnswerByID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, createdAnswer, "should have created answer")
 
-	updatedAnswer, err := repo.UpdateAnswerById(ctx, Answer{
+	updatedAnswer, err := repo.UpdateAnswerById(ctx, Answers{
 		Id:         1,
 		QuestionId: 1,
-		Text:       "test updated",
+		Answer:     "test updated",
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	})
