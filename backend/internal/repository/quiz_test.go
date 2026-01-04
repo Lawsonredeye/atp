@@ -25,30 +25,30 @@ func TestCreateQuiz(t *testing.T) {
 	assert.Equal(t, subjectId, int64(1))
 
 	quizId, err := repo.CreateQuiz(ctx, Quiz{
-		Text:             "test",
+		Question:         "test",
 		SubjectId:        subjectId,
 		IsMultipleChoice: true,
 		QuestionOptions: []QuestionOptions{
 			{
-				Text:      "test",
+				Option:    "test",
 				IsCorrect: true,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test",
+				Option:    "test",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test",
+				Option:    "test",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test",
+				Option:    "test",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -78,30 +78,30 @@ func TestCreateMultipleQuiz(t *testing.T) {
 
 	quiz := []Quiz{
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -111,30 +111,30 @@ func TestCreateMultipleQuiz(t *testing.T) {
 			UpdatedAt: time.Now(),
 		},
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -163,30 +163,30 @@ func TestGetQuizById(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, subjectId, int64(1))
 	quizId, err := repo.CreateQuiz(ctx, Quiz{
-		Text:             "test",
+		Question:         "test",
 		SubjectId:        subjectId,
 		IsMultipleChoice: true,
 		QuestionOptions: []QuestionOptions{
 			{
-				Text:      "test is the right answer",
+				Option:    "test is the right answer",
 				IsCorrect: true,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test is not the right answer",
+				Option:    "test is not the right answer",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test is not the right answer",
+				Option:    "test is not the right answer",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
 			{
-				Text:      "test",
+				Option:    "test",
 				IsCorrect: false,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -199,6 +199,6 @@ func TestGetQuizById(t *testing.T) {
 	assert.Equal(t, quizId, int64(1))
 	quiz, err := repo.GetQuizById(ctx, quizId)
 	assert.Nil(t, err)
-	assert.Equal(t, quiz.Text, "test")
+	assert.Equal(t, quiz.Question, "test")
 	fmt.Printf("fetched quiz: %+v\n", quiz)
 }

@@ -17,24 +17,24 @@ import (
 func populateDBWithSubjectID(subjectId int64) []repository.Quiz {
 	return []repository.Quiz{
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []repository.QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -44,24 +44,24 @@ func populateDBWithSubjectID(subjectId int64) []repository.Quiz {
 			UpdatedAt: time.Now(),
 		},
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []repository.QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -71,24 +71,24 @@ func populateDBWithSubjectID(subjectId int64) []repository.Quiz {
 			UpdatedAt: time.Now(),
 		},
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []repository.QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -98,24 +98,24 @@ func populateDBWithSubjectID(subjectId int64) []repository.Quiz {
 			UpdatedAt: time.Now(),
 		},
 		{
-			Text:             "test",
+			Question:         "test",
 			SubjectId:        subjectId,
 			IsMultipleChoice: true,
 			QuestionOptions: []repository.QuestionOptions{
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
 				{
-					Text:      "test",
+					Option:    "test",
 					IsCorrect: false,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -134,9 +134,9 @@ func setUpDB(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	queries := []string{
-		"CREATE TABLE question_options (id integer primary key autoincrement, question_id integer, text text, is_correct boolean, created_at timestamp, updated_at timestamp)",
-		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, text text, is_multiple_choice boolean, created_at timestamp, updated_at timestamp)",
-		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, text text, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE question_options (id integer primary key autoincrement, question_id integer, option text, is_correct boolean, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE questions (id integer primary key autoincrement, subject_id integer, question text, is_multiple_choice boolean, created_at timestamp, updated_at timestamp)",
+		"CREATE TABLE answers (id integer primary key autoincrement, question_id integer, answer text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE subjects (id integer primary key autoincrement, name text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE users (id integer primary key autoincrement, name text, email text, password_hash text, created_at timestamp, updated_at timestamp)",
 		"CREATE TABLE scores (id integer primary key autoincrement, user_id integer, score integer, mode text, correct_answers integer, incorrect_answers integer, total_questions integer, time_taken_seconds integer, subject_id integer, created_at timestamp, updated_at timestamp)",
