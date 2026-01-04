@@ -61,6 +61,16 @@ func (ur *UserRepository) UpdateUserPassword(ctx context.Context, userId int64, 
 	return nil
 }
 
+func (ur *UserRepository) UpdateUserEmail(ctx context.Context, userId int64, newEmail string) error {
+	updatedAt := time.Now()
+	query := fmt.Sprintf("UPDATE users SET email = '%s', updated_at = '%s' WHERE id = %d", newEmail, updatedAt, userId)
+	_, err := ur.db.ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdateUsername updates the username of a user in the database.
 func (ur *UserRepository) UpdateUsername(ctx context.Context, userId int64, newUsername string) error {
 	updatedAt := time.Now()

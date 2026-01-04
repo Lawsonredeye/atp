@@ -11,6 +11,29 @@ type User struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type RegisterUser struct {
+	Name     string `json:"full_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginUser struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UpdateUsername struct {
+	NewUsername string `json:"new_username"`
+}
+
+type UpdateEmail struct {
+	NewEmail string `json:"new_email"`
+}
+
+type UpdatePassword struct {
+	NewPassword string `json:"new_password"`
+}
+
 type UserScore struct {
 	ID               int64     `json:"id"`
 	UserID           int64     `json:"user_id"`

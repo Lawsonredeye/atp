@@ -170,6 +170,37 @@ func TestUpdateUsername(t *testing.T) {
 	fmt.Println("updated user: ", existingUser)
 }
 
+func TestUpdateUserEmail(t *testing.T) {
+	pool := setUpDB(t)
+	defer pool.Close()
+
+	userRepo := NewUserRepository(pool)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	user, err := userRepo.CreateUser(ctx, domain.User{
+		Name:         "John Doe",
+		Email:        "john.doe@example.com",
+		PasswordHash: "password",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("created user: ", user)
+
+	err = userRepo.UpdateUserEmail(ctx, user.ID, "newemail@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Nil(t, err)
+	existingUser, err := userRepo.GetUserWithID(ctx, user.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, "newemail@example.com", existingUser.Email)
+	fmt.Println("updated user: ", existingUser)
+}
+
 func TestDeleteUserByID(t *testing.T) {
 	pool := setUpDB(t)
 	defer pool.Close()

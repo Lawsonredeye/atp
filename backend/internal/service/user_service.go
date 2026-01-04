@@ -12,9 +12,10 @@ import (
 )
 
 type UserServiceInterface interface {
-	CreateUserAccount(ctx context.Context, user domain.User) (*domain.User, error)
+	CreateUserAccount(ctx context.Context, user domain.User, role string) (*domain.User, error)
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
+	UpdateEmail(ctx context.Context, userId int64, newEmail string) error
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
@@ -42,7 +43,7 @@ func (s *userService) CreateUserAccount(ctx context.Context, user domain.User, r
 		s.logger.Println("error creating user: ", pkg.ErrInvalidEmail)
 		return nil, pkg.ErrInvalidEmail
 	}
-	if user.PasswordHash == "" { // the len of the user password should be >= 6
+	if user.PasswordHash == "" || len(user.PasswordHash) < 6 { // the len of the user password should be >= 6
 		s.logger.Println("error creating user: ", pkg.ErrInvalidPasswordHash)
 		return nil, pkg.ErrInvalidPasswordHash
 	}
@@ -93,7 +94,34 @@ func (s *userService) UpdateUsername(ctx context.Context, userId int64, newUsern
 		s.logger.Println("error updating username: ", err)
 		return err
 	}
-	s.logger.Println("updated username: ", newUsername)
+	s.logger.Println("updated username: ", pkg.ObfuscateDetail(newUsername, "name"))
+	return nil
+}
+
+func (s *userService) UpdateUserEmail(ctx context.Context, userId int64, newEmail string) error {
+	if userId == 0 {
+		s.logger.Println("error updating email: ", pkg.ErrInvalidUserID)
+		return pkg.ErrInvalidUserID
+	}
+	if newEmail == "" {
+		s.logger.Println("error updating email: ", pkg.ErrInvalidEmail)
+		return pkg.ErrInvalidEmail
+	}
+	existingUser, err := s.userRepo.GetUserWithID(ctx, userId)
+	if err != nil {
+		s.logger.Println("error getting user: ", err)
+		return err
+	}
+	if existingUser.Email == newEmail {
+		s.logger.Println("error updating email: ", pkg.ErrInvalidEmail)
+		return pkg.ErrInvalidEmail
+	}
+	err = s.userRepo.UpdateUserEmail(ctx, userId, newEmail)
+	if err != nil {
+		s.logger.Println("error updating email: ", err)
+		return err
+	}
+	s.logger.Println("updated email: ", pkg.ObfuscateDetail(newEmail, "email"))
 	return nil
 }
 
@@ -107,7 +135,7 @@ func (s *userService) GetAllUsers(ctx context.Context) ([]domain.User, error) {
 	for i := range users {
 		users[i].PasswordHash = ""
 	}
-	s.logger.Println("getting all users: ", users)
+	s.logger.Println("number of users: ", len(users))
 	return users, nil
 }
 
@@ -142,7 +170,7 @@ func (s *userService) UpdatePassword(ctx context.Context, userId int64, newPassw
 		}
 		return pkg.ErrInternalServerError
 	}
-	s.logger.Println("updated password: ", newPassword)
+	s.logger.Println("updated password: ", pkg.ObfuscateDetail(newPassword, "password"))
 	return nil
 }
 

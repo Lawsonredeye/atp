@@ -113,6 +113,45 @@ func TestUserServiceUpdateUsername(t *testing.T) {
 	assert.Equal(t, "", updatedUser.PasswordHash)
 }
 
+func TestUserServiceUpdateUserEmail(t *testing.T) {
+	pool := setUpDB(t)
+	defer pool.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	userRepo := repository.NewUserRepository(pool)
+	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	newUser := domain.User{
+		Name:         "test",
+		Email:        "test@email.com",
+		PasswordHash: "user101",
+	}
+
+	createdUser, err := userService.CreateUserAccount(ctx, newUser, domain.UserUser)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("created user:", createdUser)
+
+	assert.Equal(t, newUser.Name, createdUser.Name)
+	assert.Equal(t, newUser.Email, createdUser.Email)
+	assert.Equal(t, "", createdUser.PasswordHash)
+
+	err = userService.UpdateUserEmail(ctx, createdUser.ID, "newtest@email.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updatedUser, err := userService.GetUserWithID(ctx, createdUser.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("updated user: %+v\n", updatedUser)
+
+	assert.Equal(t, "newtest@email.com", updatedUser.Email)
+	assert.Equal(t, newUser.Name, updatedUser.Name)
+	assert.Equal(t, "", updatedUser.PasswordHash)
+}
+
 func TestUserServiceUpdatePassword(t *testing.T) {
 	pool := setUpDB(t)
 	defer pool.Close()
