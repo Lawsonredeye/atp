@@ -11,6 +11,14 @@ type User struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type UserResponse struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"full_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type RegisterUser struct {
 	Name     string `json:"full_name"`
 	Email    string `json:"email"`
@@ -59,6 +67,13 @@ var (
 	ModeSingle   = "single"
 	ModeMultiple = "multiple"
 )
+
+// User Dashboard details, including scores and other details
+type UserDashboard struct {
+	UserResponse
+	UserStats
+	Roles []string `json:"roles"`
+}
 
 // User stats
 type UserStats struct {

@@ -21,12 +21,13 @@ func TestUserServiceCreateUser(t *testing.T) {
 	defer cancel()
 
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 
 	user := domain.User{
 		Name:         "test",
 		Email:        "test@example.com",
-		PasswordHash: "test",
+		PasswordHash: "test1011",
 	}
 
 	createdUser, err := userService.CreateUserAccount(ctx, user, "admin")
@@ -46,11 +47,12 @@ func TestUserServiceGetUserWithID(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := domain.User{
 		Name:         "test",
 		Email:        "test@example.com",
-		PasswordHash: "test",
+		PasswordHash: "test1001",
 	}
 
 	createdUser, err := userService.CreateUserAccount(ctx, newUser, "admin")
@@ -80,7 +82,8 @@ func TestUserServiceUpdateUsername(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := domain.User{
 		Name:         "test",
 		Email:        "test@email.com",
@@ -119,7 +122,8 @@ func TestUserServiceUpdateUserEmail(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := domain.User{
 		Name:         "test",
 		Email:        "test@email.com",
@@ -158,7 +162,8 @@ func TestUserServiceUpdatePassword(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := domain.User{
 		Name:         "test",
 		Email:        "test@email.com",
@@ -197,7 +202,8 @@ func TestUserServiceDeleteUserByID(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := domain.User{
 		Name:         "test",
 		Email:        "test@email.com",
@@ -227,7 +233,8 @@ func TestUserServiceGetAllUsers(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	userRepo := repository.NewUserRepository(pool)
-	userService := NewUserService(*userRepo, log.New(os.Stdout, "", 0))
+	scoreRepo := repository.NewScoreRepository(pool)
+	userService := NewUserService(*userRepo, scoreRepo, log.New(os.Stdout, "", 0))
 	newUser := []domain.User{
 		{
 			Name:         "test",

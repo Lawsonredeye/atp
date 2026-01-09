@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -89,7 +90,10 @@ func (ur *UserRepository) GetUserWithID(ctx context.Context, userId int64) (*dom
 	user := domain.User{}
 	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, pkg.ErrUserNotFound
+		}
+		return nil, pkg.ErrInternalServerError
 	}
 	return &user, nil
 }

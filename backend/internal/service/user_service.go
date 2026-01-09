@@ -15,22 +15,25 @@ type UserServiceInterface interface {
 	CreateUserAccount(ctx context.Context, user domain.User, role string) (*domain.User, error)
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
-	UpdateEmail(ctx context.Context, userId int64, newEmail string) error
+	UpdateUserEmail(ctx context.Context, userId int64, newEmail string) error
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
 	Login(ctx context.Context, email string, password string) (*domain.User, error)
+	UserDashboard(ctx context.Context, userId int64) (*domain.UserDashboard, error)
 }
 
 type userService struct {
-	userRepo repository.UserRepository
-	logger   *log.Logger
+	userRepo  repository.UserRepository
+	scoreRepo repository.ScoreRepository
+	logger    *log.Logger
 }
 
-func NewUserService(userRepo repository.UserRepository, logger *log.Logger) *userService {
+func NewUserService(userRepo repository.UserRepository, scoreRepo repository.ScoreRepository, logger *log.Logger) *userService {
 	return &userService{
-		userRepo: userRepo,
-		logger:   logger,
+		userRepo:  userRepo,
+		scoreRepo: scoreRepo,
+		logger:    logger,
 	}
 }
 
@@ -43,9 +46,10 @@ func (s *userService) CreateUserAccount(ctx context.Context, user domain.User, r
 		s.logger.Println("error creating user: ", pkg.ErrInvalidEmail)
 		return nil, pkg.ErrInvalidEmail
 	}
-	if user.PasswordHash == "" || len(user.PasswordHash) < 6 { // the len of the user password should be >= 6
-		s.logger.Println("error creating user: ", pkg.ErrInvalidPasswordHash)
-		return nil, pkg.ErrInvalidPasswordHash
+
+	if len(user.PasswordHash) < 6 {
+		s.logger.Println("error creating user: ", pkg.ErrInvalidPasswordLength)
+		return nil, pkg.ErrInvalidPasswordLength
 	}
 	createdUser, err := s.userRepo.CreateUser(ctx, user)
 	if err != nil {
@@ -190,4 +194,56 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 	}
 	s.logger.Println("user logged in: ", user)
 	return user, nil
+}
+
+func (s *userService) GetUserRoles(ctx context.Context, userId int64) ([]string, error) {
+	if userId == 0 {
+		s.logger.Println("error getting user roles: ", pkg.ErrInvalidUserID)
+		return nil, pkg.ErrInvalidUserID
+	}
+	roles, err := s.userRepo.GetUserRoles(ctx, userId)
+	if err != nil {
+		s.logger.Println("error getting user roles: ", err)
+		return nil, err
+	}
+	s.logger.Println("user roles: ", roles)
+	return roles, nil
+}
+
+func (s *userService) UserDashboard(ctx context.Context, userId int64) (*domain.UserDashboard, error) {
+	if userId == 0 {
+		s.logger.Println("error getting user dashboard: ", pkg.ErrInvalidUserID)
+		return nil, pkg.ErrInvalidUserID
+	}
+	user, err := s.userRepo.GetUserWithID(ctx, userId)
+	if err != nil {
+		s.logger.Println("error getting user dashboard: ", err)
+		return nil, err
+	}
+	if user == nil {
+		s.logger.Println("user not found")
+		return nil, pkg.ErrUserNotFound
+	}
+	userStats, err := s.scoreRepo.GetUserOverallScoreStats(ctx, userId)
+	if err != nil {
+		s.logger.Println("error getting user stats: ", err)
+		return nil, pkg.ErrInternalServerError
+	}
+	roles, err := s.userRepo.GetUserRoles(ctx, userId)
+	if err != nil {
+		s.logger.Println("error getting user roles: ", err)
+		return nil, pkg.ErrInternalServerError
+	}
+	userDashboard := &domain.UserDashboard{
+		UserResponse: domain.UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		},
+		UserStats: *userStats,
+		Roles:     roles,
+	}
+	return userDashboard, nil
 }
