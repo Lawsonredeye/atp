@@ -140,7 +140,7 @@ func TestUserServiceUpdateUserEmail(t *testing.T) {
 	assert.Equal(t, newUser.Email, createdUser.Email)
 	assert.Equal(t, "", createdUser.PasswordHash)
 
-	err = userService.UpdateUserEmail(ctx, createdUser.ID, "newtest@email.com")
+	err = userService.UpdateEmail(ctx, createdUser.ID, "newtest@email.com")
 	if err != nil {
 		t.Fatal(err)
 	}

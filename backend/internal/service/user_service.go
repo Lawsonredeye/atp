@@ -15,7 +15,7 @@ type UserServiceInterface interface {
 	CreateUserAccount(ctx context.Context, user domain.User, role string) (*domain.User, error)
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
-	UpdateUserEmail(ctx context.Context, userId int64, newEmail string) error
+	UpdateEmail(ctx context.Context, userId int64, newEmail string) error
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
@@ -102,7 +102,7 @@ func (s *userService) UpdateUsername(ctx context.Context, userId int64, newUsern
 	return nil
 }
 
-func (s *userService) UpdateUserEmail(ctx context.Context, userId int64, newEmail string) error {
+func (s *userService) UpdateEmail(ctx context.Context, userId int64, newEmail string) error {
 	if userId == 0 {
 		s.logger.Println("error updating email: ", pkg.ErrInvalidUserID)
 		return pkg.ErrInvalidUserID

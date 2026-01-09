@@ -34,10 +34,14 @@ func main() {
 
 	// Getting all handlers
 	adminHandler := handler.NewAdminHandler(userService, questionService)
-	userHandler := handler.NewUserHandler(userService, questionService, subjectService, quizService)
-	quizHandler := handler.NewQuizHandler(questionService, subjectService, userService, quizService)
+	userHandler := handler.NewUserHandler(userService, logger, cfg.Server.JWTSecret)
+	quizHandler := handler.NewQuizHandler(quizService, subjectService, logger)
 
 	e := echo.New()
 	router.NewRouter(e, adminHandler, userHandler, quizHandler)
 
+	logger.Printf("Starting server on port %s", cfg.Server.Port)
+	if err := e.Start(":" + cfg.Server.Port); err != nil {
+		logger.Fatal("Failed to start server: ", err)
+	}
 }

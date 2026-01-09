@@ -14,7 +14,7 @@ type QuestionService interface {
 	CreateQuestion(ctx context.Context, subjectId int64, question domain.QuestionsData) (int64, error)
 	CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error)
 	CreateMultipleQuestionBySubjectID(ctx context.Context, subjectId int64, questions []domain.QuestionsData) error
-	GetQuestionById(ctx context.Context, id int64) (*repository.Questions, error)
+	GetQuestionById(ctx context.Context, id int64) (*domain.Question, error)
 	GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error)
 	GetAllQuestions(ctx context.Context) ([]repository.Questions, error)
 	DeleteQuestionById(ctx context.Context, id int64) error
@@ -30,8 +30,14 @@ type questionService struct {
 }
 
 func (qs *questionService) GetAllSubjects(ctx context.Context) ([]repository.Subject, error) {
-	//TODO implement me
-	panic("implement me")
+	qs.logger.Println("Getting all subjects.")
+	result, err := qs.subjectRepository.GetSubjects(ctx)
+	if err != nil {
+		qs.logger.Println("Failed to get subjects: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got subjects. Proceeding to return result.")
+	return result, nil
 }
 
 func NewQuestionService(questionRepository repository.QuestionRepository, subjectRepository repository.SubjectRepository, logger *log.Logger) *questionService {
