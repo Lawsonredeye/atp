@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"log"
@@ -10,15 +10,19 @@ import (
 	"github.com/lawson/otterprep/internal/repository"
 	"github.com/lawson/otterprep/internal/router"
 	"github.com/lawson/otterprep/internal/service"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Println("Failed to load config", err)
+		logger.Fatal("Failed to load config: ", err)
 	}
+	logger.Println("Connecting to database...")
 	dbConn := cfg.Database.PostgresInit()
+	logger.Println("Database connected successfully")
 	// Getting all repositories
 	subjectRepository := repository.NewSubjectRepository(dbConn)
 	userRepository := repository.NewUserRepository(dbConn)

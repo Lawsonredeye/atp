@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/joho/godotenv"
 )
 
@@ -78,7 +78,11 @@ func (c *DatabaseConfig) PostgresInit() *sql.DB {
 	connStr := c.Connect()
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Crit("Failed to connect to database", "error", err)
+		log.Fatal("Failed to open database connection: ", err)
+	}
+	// Validate the connection by pinging
+	if err := db.Ping(); err != nil {
+		log.Fatal("Failed to connect to database: ", err)
 	}
 	return db
 }

@@ -262,8 +262,8 @@ docker compose up
 
 # Manual Setup
 # 1. Set up PostgreSQL and Redis
-# 2. Run the schema
-psql -U postgres -d otterprep -f schema.sql
+# 2. Run the schema (connect to Docker PostgreSQL via TCP)
+PGPASSWORD=otterprep_password psql -h localhost -U otterprep -d otterprep_db -f schema.sql
 
 # 3. Configure environment variables
 export DATABASE_URL="postgres://user:pass@localhost:5432/otterprep"
