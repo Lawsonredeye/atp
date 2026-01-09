@@ -18,4 +18,6 @@ var (
 	ErrSubjectWithNameExists      = errors.New("subject with name already exists")
 	ErrUserNotFound               = errors.New("user not found")
 	ErrInvalidRole                = errors.New("invalid role")
+	ErrInvalidPasswordLength      = errors.New("invalid password length should be greater or equal to 6")
+	ErrUnauthorized               = errors.New("unauthorized")
 )
