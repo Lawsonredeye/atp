@@ -11,18 +11,27 @@ import (
 )
 
 type QuestionService interface {
-	CreateQuestion(ctx context.Context, question repository.Questions) (int64, error)
+	CreateQuestion(ctx context.Context, subjectId int64, question domain.QuestionsData) (int64, error)
 	CreateQuestionOption(ctx context.Context, questionOption repository.QuestionOptions) (int64, error)
-	CreateMultipleQuestionBySubjectID(ctx context.Context, subjectId int64, questions []domain.QuestionsData) (int64, error)
-
+	CreateMultipleQuestionBySubjectID(ctx context.Context, subjectId int64, questions []domain.QuestionsData) error
 	GetQuestionById(ctx context.Context, id int64) (*repository.Questions, error)
 	GetQuestionOptions(ctx context.Context, questionId int64) ([]repository.QuestionOptions, error)
+	GetAllQuestions(ctx context.Context) ([]repository.Questions, error)
+	DeleteQuestionById(ctx context.Context, id int64) error
+	CreateSubject(ctx context.Context, subject string) (int64, error)
+	GetSubjectById(ctx context.Context, id int64) (*domain.Subject, error)
+	GetAllSubjects(ctx context.Context) ([]repository.Subject, error)
 }
 
 type questionService struct {
 	questionRepository repository.QuestionRepository
 	subjectRepository  repository.SubjectRepository
 	logger             *log.Logger
+}
+
+func (qs *questionService) GetAllSubjects(ctx context.Context) ([]repository.Subject, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewQuestionService(questionRepository repository.QuestionRepository, subjectRepository repository.SubjectRepository, logger *log.Logger) *questionService {
@@ -104,6 +113,13 @@ func (qs *questionService) CreateQuestionOption(ctx context.Context, questionOpt
 	}
 	qs.logger.Println("Successfully created question option. Proceeding to return id.")
 	return result, nil
+}
+
+// GetAllQuestions gets all questions.
+// It returns the questions and an error if any.
+func (qs *questionService) GetAllQuestions(ctx context.Context) ([]repository.Questions, error) {
+	qs.logger.Println("Successfully got all questions. Proceeding to return success response.")
+	return qs.questionRepository.GetAllQuestions(ctx)
 }
 
 // GetQuestionById gets a question by id.
@@ -237,6 +253,26 @@ func (qs *questionService) CreateSubject(ctx context.Context, subjectName string
 	}
 	qs.logger.Println("Successfully created subject. Proceeding to return id.")
 	return subjectId, nil
+}
+
+// GetSubjectById gets a subject by id from the subject repository.
+func (qs *questionService) GetSubjectById(ctx context.Context, id int64) (*domain.Subject, error) {
+	if id > 1 {
+		qs.logger.Println("Subject id is greater than 1. Proceeding to return error.")
+		return nil, pkg.ErrSubjectNotFound
+	}
+	qs.logger.Println("Successfully got subject by id. Proceeding to get subject.")
+	result, err := qs.subjectRepository.GetSubjectById(ctx, id)
+	if err != nil {
+		qs.logger.Println("Failed to get subject by id: ", err)
+		return nil, err
+	}
+	qs.logger.Println("Successfully got subject by id. Proceeding to return result.")
+	domainSubject := domain.Subject{
+		Id:   result.Id,
+		Name: result.Name,
+	}
+	return &domainSubject, nil
 }
 
 // GetSubjectByName gets a subject by name from the subject repository.
