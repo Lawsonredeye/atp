@@ -111,7 +111,6 @@ func (qs *questionService) CreateQuestionOption(ctx context.Context, questionOpt
 		qs.logger.Println("Question id is 0. Proceeding to return error.")
 		return 0, pkg.ErrQuestionNotFound
 	}
-	qs.logger.Println("Successfully created question option. Proceeding to return id.")
 	result, err := qs.questionRepository.CreateQuestionOption(ctx, questionOption)
 	if err != nil {
 		qs.logger.Println("Failed to create question option: ", err)
@@ -139,7 +138,7 @@ func (qs *questionService) GetQuestionById(ctx context.Context, id int64) (*doma
 	result, err := qs.questionRepository.GetQuestionById(ctx, id)
 	if err != nil {
 		qs.logger.Println("Failed to get question by id: ", err)
-		return nil, err
+		return nil, pkg.ErrInvalidQuestionID
 	}
 	qs.logger.Println("Successfully got question by id. Proceeding to get the question options.")
 	questionOptions, err := qs.questionRepository.GetQuestionOptions(ctx, id)
