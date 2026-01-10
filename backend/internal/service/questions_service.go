@@ -271,7 +271,7 @@ func (qs *questionService) GetSubjectById(ctx context.Context, id int64) (*domai
 	result, err := qs.subjectRepository.GetSubjectById(ctx, id)
 	if err != nil {
 		qs.logger.Println("Failed to get subject by id: ", err)
-		return nil, err
+		return nil, pkg.ErrSubjectNotFound
 	}
 	qs.logger.Println("Successfully got subject by id. Proceeding to return result.")
 	domainSubject := domain.Subject{
