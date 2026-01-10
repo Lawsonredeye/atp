@@ -21,4 +21,5 @@ var (
 	ErrInvalidPasswordLength      = errors.New("invalid password length should be greater or equal to 6")
 	ErrUnauthorized               = errors.New("unauthorized")
 	ErrUserAlreadyExists          = errors.New("email already exists")
+	ErrInvalidQuestionID          = errors.New("invalid question id")
 )

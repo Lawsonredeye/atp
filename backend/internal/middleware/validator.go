@@ -30,8 +30,26 @@ func NewValidator() *CustomValidator {
 	return &CustomValidator{Validator: v}
 }
 
-// Validate validates a struct based on its validation tags
+// Validate validates a struct or slice based on validation tags
 func (cv *CustomValidator) Validate(i interface{}) error {
+	val := reflect.ValueOf(i)
+
+	// Handle pointer
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	// If it's a slice, validate each element
+	if val.Kind() == reflect.Slice {
+		for j := 0; j < val.Len(); j++ {
+			if err := cv.Validator.Struct(val.Index(j).Interface()); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Otherwise validate as struct
 	if err := cv.Validator.Struct(i); err != nil {
 		return err
 	}
