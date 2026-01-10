@@ -43,11 +43,11 @@ func NewRouter(
 	api.POST("/admin/questions/bulk", adminHandler.CreateBulkQuestions)
 	api.POST("/admin/questions/single", adminHandler.UploadSingleQuestion)
 	api.GET("/admin/questions", adminHandler.GetAllQuestions)
-	api.GET("/admin/questions/:question_id", adminHandler.GetQuestionById)
+	api.GET("/admin/questions/:id", adminHandler.GetQuestionById)
 
 	// Subject routes
 	api.GET("/admin/subject", adminHandler.GetAllSubjects)
-	api.GET("/admin/subject/:subject_id", adminHandler.GetSubjectById)
+	api.GET("/admin/subject/:id", adminHandler.GetSubjectById)
 	api.POST("/admin/subject", adminHandler.CreateSubject)
 
 	// Quiz routes
