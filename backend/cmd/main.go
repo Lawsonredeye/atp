@@ -29,20 +29,23 @@ func main() {
 	quizRepository := repository.NewQuizRepository(dbConn)
 	scoreRepository := repository.NewScoreRepository(dbConn)
 	questionRepository := repository.NewQuestionRepository(dbConn)
+	leaderboardRepository := repository.NewLeaderboardRepository(dbConn)
 
 	// Getting all services
 	subjectService := service.NewSubjectService(subjectRepository)
 	userService := service.NewUserService(*userRepository, scoreRepository, logger)
 	quizService := service.NewQuizService(quizRepository, subjectRepository, questionRepository, scoreRepository)
 	questionService := service.NewQuestionService(questionRepository, subjectRepository, logger)
+	leaderboardService := service.NewLeaderboardService(leaderboardRepository, subjectRepository)
 
 	// Getting all handlers
 	adminHandler := handler.NewAdminHandler(userService, questionService, logger)
 	userHandler := handler.NewUserHandler(userService, logger, cfg.Server.JWTSecret)
 	quizHandler := handler.NewQuizHandler(quizService, subjectService, logger)
+	leaderboardHandler := handler.NewLeaderboardHandler(leaderboardService, logger)
 
 	e := echo.New()
-	router.NewRouter(e, adminHandler, userHandler, quizHandler, cfg)
+	router.NewRouter(e, adminHandler, userHandler, quizHandler, leaderboardHandler, cfg)
 
 	logger.Printf("Starting server on port %s", cfg.Server.Port)
 	if err := e.Start(":" + cfg.Server.Port); err != nil {

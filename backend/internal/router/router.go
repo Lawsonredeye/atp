@@ -12,6 +12,7 @@ func NewRouter(
 	adminHandler *handler.AdminHandler,
 	userHandler *handler.UserHandler,
 	quizHandler *handler.QuizHandler,
+	leaderboardHandler *handler.LeaderboardHandler,
 	cfg *config.Config,
 ) {
 	// Set up error handlers
@@ -41,12 +42,17 @@ func NewRouter(
 
 	// User
 	api.GET("/dashboard", userHandler.UserDashboard)
+	api.PUT("/user/username", userHandler.UpdateUsername)
+	api.PUT("/user/email", userHandler.UpdateEmail)
+	api.PUT("/user/password", userHandler.UpdatePassword)
+	api.DELETE("/user/account", userHandler.DeleteUserAccount)
 
 	// Admin routes
 	api.POST("/admin/questions/bulk/:subject_id", adminHandler.CreateBulkQuestions)
 	api.POST("/admin/questions/single/:subject_id", adminHandler.UploadSingleQuestion)
 	api.GET("/admin/questions", adminHandler.GetAllQuestions)
 	api.GET("/admin/questions/:id", adminHandler.GetQuestionById)
+	api.DELETE("/admin/questions/:id", adminHandler.DeleteQuestionById)
 
 	// Subject routes
 	api.GET("/admin/subject", adminHandler.GetAllSubjects)
@@ -55,5 +61,10 @@ func NewRouter(
 
 	// Quiz routes
 	api.POST("/quiz/create", quizHandler.CreateQuiz)
-	api.GET("/quiz/submit", quizHandler.SubmitQuiz)
+	api.POST("/quiz/submit", quizHandler.SubmitQuiz)
+
+	// Leaderboard routes
+	api.GET("/leaderboard", leaderboardHandler.GetLeaderboard)
+	api.GET("/leaderboard/me", leaderboardHandler.GetMyRank)
+	api.GET("/leaderboard/user/:user_id", leaderboardHandler.GetUserRank)
 }
