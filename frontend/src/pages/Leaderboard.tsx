@@ -1,43 +1,89 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/layout';
-import { Button, Card, Alert } from '../components/ui';
+import { Button, Card, Alert, Select } from '../components/ui';
 import { LeaderboardTable } from '../components/leaderboard';
-import { leaderboardService } from '../services';
+import { leaderboardService, subjectService } from '../services';
 import { useAuth } from '../context/AuthContext';
-import type { LeaderboardEntry, UserRank } from '../types';
-import { Trophy, RefreshCw, ArrowLeft, Target, TrendingUp, Users } from 'lucide-react';
+import type { LeaderboardEntry, UserRank, Subject } from '../types';
+import { Trophy, RefreshCw, ArrowLeft, Target, TrendingUp, Users, Filter } from 'lucide-react';
 import { formatScore, formatPercentage } from '../utils/formatters';
+
+type Period = 'all_time' | 'weekly' | 'monthly';
 
 function Leaderboard() {
   const { state } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [userRank, setUserRank] = useState<UserRank | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async () => {
+  // Filter state
+  const [period, setPeriod] = useState<Period>('all_time');
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
+
+  const fetchSubjects = useCallback(async () => {
+    try {
+      const data = await subjectService.getAllSubjects();
+      setSubjects(data);
+    } catch (err) {
+      console.error('Failed to load subjects');
+    }
+  }, []);
+
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
+      const subjectId = selectedSubject ? parseInt(selectedSubject) : undefined;
+
       const [leaderboardData, userRankData] = await Promise.all([
-        leaderboardService.getLeaderboard(50, 0),
-        leaderboardService.getMyRank().catch(() => null),
+        leaderboardService.getLeaderboard({ limit: 50, period, subject_id: subjectId }),
+        leaderboardService.getMyRank(subjectId).catch(() => null),
       ]);
 
-      setEntries(leaderboardData);
+      setEntries(leaderboardData.entries || []);
       setUserRank(userRankData);
     } catch (err) {
       setError('Failed to load leaderboard. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [period, selectedSubject]);
+
+  useEffect(() => {
+    fetchSubjects();
+  }, [fetchSubjects]);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [fetchLeaderboard]);
+
+  const periodOptions = [
+    { value: 'all_time', label: 'All Time' },
+    { value: 'weekly', label: 'This Week' },
+    { value: 'monthly', label: 'This Month' },
+  ];
+
+  const subjectOptions = [
+    { value: '', label: 'All Subjects' },
+    ...subjects.map(s => ({ value: s.id.toString(), label: s.name })),
+  ];
+
+  const getFilterLabel = () => {
+    const parts = [];
+    if (period === 'weekly') parts.push('Weekly');
+    else if (period === 'monthly') parts.push('Monthly');
+    else parts.push('All Time');
+
+    if (selectedSubject) {
+      const subject = subjects.find(s => s.id.toString() === selectedSubject);
+      if (subject) parts.push(subject.name);
+    }
+    return parts.join(' • ');
+  };
 
   return (
     <Layout>
@@ -52,7 +98,7 @@ function Leaderboard() {
                 </div>
                 <div>
                   <h1 className="font-display text-3xl sm:text-4xl font-bold">Leaderboard</h1>
-                  <p className="font-body text-gray-600">Top performers nationwide</p>
+                  <p className="font-body text-gray-600">Top performers • {getFilterLabel()}</p>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -68,6 +114,29 @@ function Leaderboard() {
                 </Link>
               </div>
             </div>
+
+            {/* Filters */}
+            <Card className="p-4 mb-6 bg-cream">
+              <div className="flex items-center gap-3 mb-4">
+                <Filter className="w-5 h-5" />
+                <h3 className="font-display font-bold uppercase">Filter Leaderboard</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  label="Time Period"
+                  options={periodOptions}
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as Period)}
+                />
+                <Select
+                  label="Subject"
+                  options={subjectOptions}
+                  value={selectedSubject}
+                  onChange={(e) => setSelectedSubject(e.target.value)}
+                  placeholder="All Subjects"
+                />
+              </div>
+            </Card>
 
             {/* User Stats Card */}
             {userRank && (

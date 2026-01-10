@@ -11,6 +11,9 @@ import Quiz from './pages/Quiz';
 import Leaderboard from './pages/Leaderboard';
 import NotFound from './pages/NotFound';
 
+// Admin Pages
+import { AdminLogin, AdminDashboard } from './pages/admin';
+
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +23,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>

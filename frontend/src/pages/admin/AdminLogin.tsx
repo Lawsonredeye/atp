@@ -1,38 +1,41 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Layout } from '../components/layout';
-import { Button, Input, Card, Alert } from '../components/ui';
-import { useAuth } from '../context/AuthContext';
-import { loginSchema, type LoginFormData } from '../utils/validators';
-import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react';
+import { z } from 'zod';
+import { Layout } from '../../components/layout';
+import { Button, Input, Card, Alert } from '../../components/ui';
+import { adminService } from '../../services';
+import { Shield, Mail, Lock, ArrowRight } from 'lucide-react';
 import type { AxiosError } from 'axios';
 
-function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+const adminLoginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
+
+function AdminLogin() {
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<AdminLoginFormData>({
+    resolver: zodResolver(adminLoginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: AdminLoginFormData) => {
     try {
       setError(null);
-      await login(data);
-      navigate(from, { replace: true });
+      await adminService.login(data);
+      navigate('/admin/dashboard', { replace: true });
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
-      setError(axiosError.response?.data?.message || 'Invalid email or password. Please try again.');
+      setError(axiosError.response?.data?.message || 'Invalid credentials. Please try again.');
     }
   };
 
@@ -42,12 +45,12 @@ function Login() {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary border-4 border-black shadow-brutal mb-4">
-              <LogIn className="w-8 h-8" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary border-4 border-black shadow-brutal mb-4">
+              <Shield className="w-8 h-8 text-white" />
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">Welcome Back!</h1>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">Admin Login</h1>
             <p className="font-body text-gray-600">
-              Sign in to continue your JAMB prep journey
+              Access the admin dashboard
             </p>
           </div>
 
@@ -65,7 +68,7 @@ function Login() {
                 <Input
                   label="Email Address"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="admin@example.com"
                   className="pl-12"
                   error={errors.email?.message}
                   {...register('email')}
@@ -87,52 +90,31 @@ function Login() {
               <Button
                 type="submit"
                 isLoading={isSubmitting}
-                className="w-full"
+                className="w-full bg-secondary hover:bg-secondary-light"
                 size="lg"
               >
-                {isSubmitting ? 'Signing in...' : 'Sign In'}
+                {isSubmitting ? 'Signing in...' : 'Admin Sign In'}
                 {!isSubmitting && <ArrowRight className="inline ml-2 w-5 h-5" />}
               </Button>
             </form>
 
             <div className="mt-6 pt-6 border-t-3 border-black text-center">
               <p className="font-body text-gray-600">
-                Don't have an account?{' '}
+                Not an admin?{' '}
                 <Link
-                  to="/register"
+                  to="/login"
                   className="font-display font-bold text-primary hover:text-primary-dark underline underline-offset-4"
                 >
-                  Sign up for free
+                  User login
                 </Link>
               </p>
             </div>
           </Card>
-
-          {/* Demo Credentials */}
-          <Card className="mt-4 p-4 bg-accent-yellow">
-            <p className="font-display font-bold text-sm uppercase mb-2">Demo Account</p>
-            <p className="font-body text-sm">
-              Email: <span className="font-mono font-bold">demo@example.com</span>
-            </p>
-            <p className="font-body text-sm">
-              Password: <span className="font-mono font-bold">password123</span>
-            </p>
-          </Card>
-
-          {/* Admin Link */}
-          <div className="mt-4 text-center">
-            <Link
-              to="/admin/login"
-              className="font-body text-sm text-gray-500 hover:text-secondary underline"
-            >
-              Admin Login →
-            </Link>
-          </div>
         </div>
       </div>
     </Layout>
   );
 }
 
-export default Login;
+export default AdminLogin;
 
