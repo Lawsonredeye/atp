@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lawson/otterprep/config"
@@ -23,6 +29,7 @@ func main() {
 	logger.Println("Connecting to database...")
 	dbConn := cfg.Database.PostgresInit()
 	logger.Println("Database connected successfully")
+
 	// Getting all repositories
 	subjectRepository := repository.NewSubjectRepository(dbConn)
 	userRepository := repository.NewUserRepository(dbConn)
@@ -47,8 +54,34 @@ func main() {
 	e := echo.New()
 	router.NewRouter(e, adminHandler, userHandler, quizHandler, leaderboardHandler, cfg)
 
-	logger.Printf("Starting server on port %s", cfg.Server.Port)
-	if err := e.Start(":" + cfg.Server.Port); err != nil {
-		logger.Fatal("Failed to start server: ", err)
+	// Start server in a goroutine
+	go func() {
+		logger.Printf("Starting server on port %s", cfg.Server.Port)
+		if err := e.Start(":" + cfg.Server.Port); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal("Failed to start server: ", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shut down the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Println("Shutting down server...")
+
+	// Create a deadline for the shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Shutdown the Echo server
+	if err := e.Shutdown(ctx); err != nil {
+		logger.Printf("Error during server shutdown: %v", err)
 	}
+
+	// Close database connection
+	if err := dbConn.Close(); err != nil {
+		logger.Printf("Error closing database connection: %v", err)
+	}
+
+	logger.Println("Server gracefully stopped")
 }
