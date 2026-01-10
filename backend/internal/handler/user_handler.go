@@ -88,10 +88,12 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 // @Router /users/admin [post]
 func (h *UserHandler) CreateUserAdmin(c echo.Context) error {
 	var user domain.RegisterUser
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&user); err != nil {
+		return err
 	}
 	now := time.Now()
 	newUser := domain.User{
@@ -126,10 +128,12 @@ func (h *UserHandler) CreateUserAdmin(c echo.Context) error {
 // @Router /users/login [post]
 func (h *UserHandler) Login(c echo.Context) error {
 	var user domain.LoginUser
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&user); err != nil {
+		return err
 	}
 	loginUser, err := h.userService.Login(c.Request().Context(), user.Email, user.Password)
 	if err != nil {
@@ -167,10 +171,12 @@ func (h *UserHandler) Login(c echo.Context) error {
 // @Router /users/login [post]
 func (h *UserHandler) AdminLogin(c echo.Context) error {
 	var user domain.LoginUser
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&user); err != nil {
+		return err
 	}
 	loginUser, err := h.userService.Login(c.Request().Context(), user.Email, user.Password)
 	if err != nil {

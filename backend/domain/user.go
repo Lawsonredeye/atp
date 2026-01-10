@@ -20,26 +20,26 @@ type UserResponse struct {
 }
 
 type RegisterUser struct {
-	Name     string `json:"full_name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"full_name" validate:"required,min=2,max=100"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6,max=72"`
 }
 
 type LoginUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 type UpdateUsername struct {
-	NewUsername string `json:"new_username"`
+	NewUsername string `json:"new_username" validate:"required,min=2,max=100"`
 }
 
 type UpdateEmail struct {
-	NewEmail string `json:"new_email"`
+	NewEmail string `json:"new_email" validate:"required,email"`
 }
 
 type UpdatePassword struct {
-	NewPassword string `json:"new_password"`
+	NewPassword string `json:"new_password" validate:"required,min=6,max=72"`
 }
 
 type UserScore struct {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lawson/otterprep/domain"
+	"github.com/lawson/otterprep/internal/middleware"
 	"github.com/lawson/otterprep/internal/service"
 	"github.com/lawson/otterprep/pkg"
 )
@@ -63,6 +64,9 @@ func (ah *AdminHandler) UploadSingleQuestion(c echo.Context) error {
 	if err := c.Bind(&question); err != nil {
 		ah.logger.Println("error binding question: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&question); err != nil {
+		return err
 	}
 	subjectId := c.QueryParam("subject_id")
 	if subjectId == "" {
@@ -185,13 +189,20 @@ func (ah *AdminHandler) DeleteQuestionById(c echo.Context) error {
 // @Failure 500 {object} pkg.ErrorResponse
 // @Router /admin/subject [post]
 func (ah *AdminHandler) CreateSubject(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole, ok := middleware.GetUserRole(c)
+	if !ok {
+		return pkg.ErrorResponse(c, pkg.ErrInvalidRole, http.StatusUnauthorized)
+	}
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
 	}
 	var subject domain.Subject
 	if err := c.Bind(&subject); err != nil {
+		ah.logger.Println("error binding subject: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&subject); err != nil {
 		ah.logger.Println("error binding subject: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}

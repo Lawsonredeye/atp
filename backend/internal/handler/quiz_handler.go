@@ -43,6 +43,9 @@ func (h *QuizHandler) CreateQuiz(c echo.Context) error {
 	if err := c.Bind(&quizRequest); err != nil {
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
+	if err := c.Validate(&quizRequest); err != nil {
+		return err
+	}
 	subjectId := quizRequest.SubjectId
 	// check if subject with id exists
 	_, err := h.subjectService.GetSubjectById(c.Request().Context(), subjectId)

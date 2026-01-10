@@ -14,6 +14,20 @@ func NewRouter(
 	quizHandler *handler.QuizHandler,
 	cfg *config.Config,
 ) {
+	// Set up error handlers
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
+	e.Use(middleware.RecoverMiddleware())
+
+	// Set up custom validator
+	e.Validator = middleware.NewValidator()
+
+	// Handle 404 and 405 errors
+	echo.NotFoundHandler = func(c echo.Context) error {
+		return middleware.NotFoundHandler(c)
+	}
+	echo.MethodNotAllowedHandler = func(c echo.Context) error {
+		return middleware.MethodNotAllowedHandler(c)
+	}
 
 	// User routes
 	e.POST("/user/login", userHandler.Login)

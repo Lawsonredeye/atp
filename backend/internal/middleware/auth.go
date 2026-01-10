@@ -12,7 +12,7 @@ type ContextKey string
 
 const (
 	UserIDKey   ContextKey = "user_id"
-	UserRoleKey ContextKey = "user_role"
+	UserRoleKey ContextKey = "role"
 )
 
 type JWTClaims struct {
@@ -26,15 +26,19 @@ func JWTAuthMiddleware(jwtSecret string) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
-				return c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "missing authorization header",
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"success": false,
+					"error":   "missing authorization header",
+					"status":  http.StatusUnauthorized,
 				})
 			}
 
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-				return c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "invalid authorization header format",
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"success": false,
+					"error":   "invalid authorization header format",
+					"status":  http.StatusUnauthorized,
 				})
 			}
 
@@ -48,15 +52,19 @@ func JWTAuthMiddleware(jwtSecret string) echo.MiddlewareFunc {
 			})
 
 			if err != nil || !token.Valid {
-				return c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "invalid or expired token",
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"success": false,
+					"error":   "invalid or expired token",
+					"status":  http.StatusUnauthorized,
 				})
 			}
 
 			claims, ok := token.Claims.(*JWTClaims)
 			if !ok {
-				return c.JSON(http.StatusUnauthorized, map[string]string{
-					"error": "invalid token claims",
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"success": false,
+					"error":   "invalid token claims",
+					"status":  http.StatusUnauthorized,
 				})
 			}
 

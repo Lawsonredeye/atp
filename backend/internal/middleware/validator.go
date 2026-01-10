@@ -1,0 +1,129 @@
+package middleware
+
+import (
+	"net/http"
+	"reflect"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+)
+
+// CustomValidator wraps the validator package for Echo
+type CustomValidator struct {
+	Validator *validator.Validate
+}
+
+// NewValidator creates a new custom validator instance
+func NewValidator() *CustomValidator {
+	v := validator.New()
+
+	// Register function to get json tag name for error messages
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+
+	return &CustomValidator{Validator: v}
+}
+
+// Validate validates a struct based on its validation tags
+func (cv *CustomValidator) Validate(i interface{}) error {
+	if err := cv.Validator.Struct(i); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ValidationError represents a single validation error
+type ValidationError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+// ValidationErrorResponse is the response for validation errors
+type ValidationErrorResponse struct {
+	Success bool              `json:"success"`
+	Status  int               `json:"status"`
+	Error   string            `json:"error"`
+	Details []ValidationError `json:"details"`
+}
+
+// FormatValidationErrors formats validator errors into a user-friendly response
+func FormatValidationErrors(err error) ValidationErrorResponse {
+	var errors []ValidationError
+
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		for _, e := range validationErrors {
+			errors = append(errors, ValidationError{
+				Field:   e.Field(),
+				Message: getErrorMessage(e),
+			})
+		}
+	}
+
+	return ValidationErrorResponse{
+		Success: false,
+		Status:  http.StatusBadRequest,
+		Error:   "validation failed",
+		Details: errors,
+	}
+}
+
+// getErrorMessage returns a human-readable error message for each validation tag
+func getErrorMessage(e validator.FieldError) string {
+	switch e.Tag() {
+	case "required":
+		return e.Field() + " is required"
+	case "email":
+		return e.Field() + " must be a valid email address"
+	case "min":
+		return e.Field() + " must be at least " + e.Param() + " characters"
+	case "max":
+		return e.Field() + " must be at most " + e.Param() + " characters"
+	case "gte":
+		return e.Field() + " must be greater than or equal to " + e.Param()
+	case "gt":
+		return e.Field() + " must be greater than " + e.Param()
+	case "lte":
+		return e.Field() + " must be less than or equal to " + e.Param()
+	case "lt":
+		return e.Field() + " must be less than " + e.Param()
+	case "len":
+		return e.Field() + " must be exactly " + e.Param() + " characters"
+	case "oneof":
+		return e.Field() + " must be one of: " + e.Param()
+	case "alphanum":
+		return e.Field() + " must contain only alphanumeric characters"
+	case "alpha":
+		return e.Field() + " must contain only alphabetic characters"
+	case "numeric":
+		return e.Field() + " must be a valid number"
+	case "url":
+		return e.Field() + " must be a valid URL"
+	case "dive":
+		return e.Field() + " contains invalid items"
+	default:
+		return e.Field() + " is invalid"
+	}
+}
+
+// BindAndValidate binds the request body and validates it
+func BindAndValidate(c echo.Context, i interface{}) error {
+	if err := c.Bind(i); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"status":  http.StatusBadRequest,
+			"error":   "invalid request body: " + err.Error(),
+		})
+	}
+
+	if err := c.Validate(i); err != nil {
+		return c.JSON(http.StatusBadRequest, FormatValidationErrors(err))
+	}
+
+	return nil
+}

@@ -17,7 +17,7 @@ var (
 	ErrSubjectNameNotFound        = errors.New("invalid / empty subject name")
 	ErrSubjectWithNameExists      = errors.New("subject with name already exists")
 	ErrUserNotFound               = errors.New("user not found")
-	ErrInvalidRole                = errors.New("invalid role")
+	ErrInvalidRole                = errors.New("invalid user role")
 	ErrInvalidPasswordLength      = errors.New("invalid password length should be greater or equal to 6")
 	ErrUnauthorized               = errors.New("unauthorized")
 	ErrUserAlreadyExists          = errors.New("email already exists")
