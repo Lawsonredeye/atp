@@ -107,11 +107,11 @@ func (ah *AdminHandler) GetAllQuestions(c echo.Context) error {
 }
 
 func (ah *AdminHandler) GetQuestionById(c echo.Context) error {
-	userRole := c.Get("role").(string)
-	if userRole != "admin" {
-		ah.logger.Println("user is not admin. Proceeding to return error.")
-		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
-	}
+	//userRole := c.Get("role").(string)
+	//if userRole != "admin" {
+	//	ah.logger.Println("user is not admin. Proceeding to return error.")
+	//	return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
+	//}
 	questionId := c.Param("id")
 	if questionId == "" {
 		ah.logger.Println("question id is empty. Proceeding to return error.")
@@ -234,11 +234,11 @@ func (ah *AdminHandler) CreateSubject(c echo.Context) error {
 // @Failure 500 {object} pkg.ErrorResponse
 // @Router /admin/subject [get]
 func (ah *AdminHandler) GetSubjectById(c echo.Context) error {
-	userRole, _ := middleware.GetUserRole(c)
-	if userRole != "admin" {
-		ah.logger.Println("user is not admin. Proceeding to return error.")
-		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
-	}
+	//userRole, _ := middleware.GetUserRole(c)
+	//if userRole != "admin" {
+	//	ah.logger.Println("user is not admin. Proceeding to return error.")
+	//	return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
+	//}
 	subjectId := c.Param("id")
 	if subjectId == "" {
 		ah.logger.Println("subject id is empty. Proceeding to return error.")
@@ -269,11 +269,11 @@ func (ah *AdminHandler) GetSubjectById(c echo.Context) error {
 // @Failure 500 {object} pkg.ErrorResponse
 // @Router /admin/subject [get]
 func (ah *AdminHandler) GetAllSubjects(c echo.Context) error {
-	userRole := c.Get("role").(string)
-	if userRole != "admin" {
-		ah.logger.Println("user is not admin. Proceeding to return error.")
-		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
-	}
+	//userRole := c.Get("role").(string)
+	////if userRole != "admin" {
+	////	ah.logger.Println("user is not admin. Proceeding to return error.")
+	////	return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
+	////}
 	subjects, err := ah.questionService.GetAllSubjects(c.Request().Context())
 	if err != nil {
 		ah.logger.Println("error getting all subjects: ", err)
