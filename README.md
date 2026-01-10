@@ -73,16 +73,44 @@ The server will start on `http://localhost:8080`
 
 ### Public Routes
 
-| Method | Endpoint           | Description          |
-|--------|-------------------|----------------------|
-| POST   | `/user/register`   | Register a new user  |
-| POST   | `/user/login`      | User login           |
-| POST   | `/admin/register`  | Register admin user  |
-| POST   | `/admin/login`     | Admin login          |
+| Method | Endpoint           | Description          | Rate Limit |
+|--------|-------------------|----------------------|------------|
+| POST   | `/user/register`   | Register a new user  | 3/min      |
+| POST   | `/user/login`      | User login           | 5/min      |
+| POST   | `/admin/register`  | Register admin user  | 3/min      |
+| POST   | `/admin/login`     | Admin login          | 5/min      |
+| POST   | `/auth/refresh`    | Refresh access token | 10/min     |
+
+### Token Refresh
+
+When your access token expires, use the refresh token to get a new pair:
+
+```bash
+POST /auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "your-refresh-token-here"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "access_token": "new-access-token",
+    "refresh_token": "new-refresh-token",
+    "expires_in": 900
+  }
+}
+```
 
 ### Protected Routes (Requires JWT)
 
 All protected routes require `Authorization: Bearer <token>` header.
+
+**Rate Limit:** 100 requests per minute per IP for all protected routes.
 
 #### Admin - Questions
 
@@ -275,10 +303,11 @@ otterprep/
 
 ## Features
 
-- ✅ User authentication (JWT)
+- ✅ User authentication (JWT with refresh tokens)
 - ✅ Role-based access control (Admin/User)
 - ✅ Request validation
 - ✅ Custom error handling
+- ✅ Rate limiting (login, register, API endpoints)
 - ✅ Quiz generation by subject
 - ✅ Score tracking
 - ✅ Bulk question upload

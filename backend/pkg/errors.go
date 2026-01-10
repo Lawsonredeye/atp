@@ -24,4 +24,6 @@ var (
 	ErrUserAlreadyExists          = errors.New("email already exists")
 	ErrInvalidQuestionID          = errors.New("invalid question id")
 	ErrUserRankNotFound           = errors.New("user has no quiz scores yet")
+	ErrInvalidToken               = errors.New("invalid or expired token")
+	ErrRefreshTokenRequired       = errors.New("refresh token is required")
 )

@@ -66,3 +66,28 @@ func GenerateRefreshToken(userId int64, userRole string, refreshTokenExpiry time
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
 }
+
+// ParseToken parses and validates a JWT token, returning the claims
+func ParseToken(tokenString string, secret string) (*domain.JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &domain.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidToken
+		}
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	if !token.Valid {
+		return nil, ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(*domain.JWTClaims)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+
+	return claims, nil
+}

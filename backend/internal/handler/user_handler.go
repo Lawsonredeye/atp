@@ -210,6 +210,57 @@ func (h *UserHandler) AdminLogin(c echo.Context) error {
 	return pkg.SuccessResponse(c, data, http.StatusOK)
 }
 
+// RefreshToken refreshes the access token using a valid refresh token
+// @Summary Refresh access token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body domain.RefreshTokenRequest true "Refresh Token"
+// @Success 200 {object} domain.TokenResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /auth/refresh [post]
+func (h *UserHandler) RefreshToken(c echo.Context) error {
+	var req domain.RefreshTokenRequest
+	if err := c.Bind(&req); err != nil {
+		h.logger.Println("error binding refresh token request: ", err)
+		return pkg.ErrorResponse(c, pkg.ErrRefreshTokenRequired, http.StatusBadRequest)
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	// Parse and validate the refresh token
+	claims, err := pkg.ParseToken(req.RefreshToken, h.secret)
+	if err != nil {
+		h.logger.Println("error parsing refresh token: ", err)
+		return pkg.ErrorResponse(c, pkg.ErrInvalidToken, http.StatusUnauthorized)
+	}
+
+	// Generate new access token
+	accessToken, err := pkg.GenerateAccessToken(claims.UserID, claims.Role, accessTokenExpiry, h.secret)
+	if err != nil {
+		h.logger.Println("error generating access token: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
+	}
+
+	// Generate new refresh token (token rotation for security)
+	newRefreshToken, err := pkg.GenerateRefreshToken(claims.UserID, claims.Role, refreshTokenExpiry, h.secret)
+	if err != nil {
+		h.logger.Println("error generating refresh token: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
+	}
+
+	h.logger.Printf("tokens refreshed for user: %d", claims.UserID)
+
+	response := domain.TokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+		ExpiresIn:    int64(accessTokenExpiry.Seconds()),
+	}
+	return pkg.SuccessResponse(c, response, http.StatusOK)
+}
+
 // UpdateUsername updates a user's username
 // @Summary Update a user's username
 // @Tags Users

@@ -30,15 +30,25 @@ func NewRouter(
 		return middleware.MethodNotAllowedHandler(c)
 	}
 
-	// User routes
-	e.POST("/user/login", userHandler.Login)
-	e.POST("/user/register", userHandler.CreateUser)
-	e.POST("/admin/register", userHandler.CreateUserAdmin)
-	e.POST("/admin/login", userHandler.AdminLogin)
+	// Public routes with rate limiting
+	// Auth routes - stricter rate limits
+	authGroup := e.Group("")
 
-	// Protected
+	// Login endpoints - 5 attempts per minute
+	e.POST("/user/login", userHandler.Login, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
+	e.POST("/admin/login", userHandler.AdminLogin, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
+
+	// Register endpoints - 3 attempts per minute
+	e.POST("/user/register", userHandler.CreateUser, middleware.RateLimitMiddleware(middleware.RegisterRateLimiter))
+	e.POST("/admin/register", userHandler.CreateUserAdmin, middleware.RateLimitMiddleware(middleware.RegisterRateLimiter))
+
+	// Refresh token - 10 attempts per minute
+	authGroup.POST("/auth/refresh", userHandler.RefreshToken, middleware.RateLimitMiddleware(middleware.RefreshTokenRateLimiter))
+
+	// Protected routes with general API rate limiting
 	api := e.Group("/api/v1")
 	api.Use(middleware.JWTAuthMiddleware(cfg.Server.JWTSecret))
+	api.Use(middleware.RateLimitMiddleware(middleware.APIRateLimiter))
 
 	// User
 	api.GET("/dashboard", userHandler.UserDashboard)
