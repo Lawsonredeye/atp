@@ -1,4 +1,4 @@
-# OtterPrep 🦦
+# ScoreThatExam 🎯
 
 A web application for preparing for JAMB (Joint Admissions and Matriculation Board) exams, powered by JAMB syllabus and past questions.
 
@@ -22,8 +22,8 @@ A web application for preparing for JAMB (Joint Admissions and Matriculation Boa
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/lawson/otterprep.git
-cd otterprep
+git clone https://github.com/lawson/scorethatexam.git
+cd scorethatexam
 ```
 
 ### 2. Environment Variables
@@ -279,7 +279,7 @@ psql -U otterprep -d otterprep_db -f schema.sql
 ## Project Structure
 
 ```
-otterprep/
+scorethatexam/
 ├── docker-compose.yml
 ├── schema.sql
 ├── README.md
