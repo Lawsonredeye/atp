@@ -232,8 +232,8 @@ func (qs *questionService) CreateSubject(ctx context.Context, subjectName string
 
 // GetSubjectById gets a subject by id from the subject repository.
 func (qs *questionService) GetSubjectById(ctx context.Context, id int64) (*domain.Subject, error) {
-	if id > 1 {
-		qs.logger.Println("Subject id is greater than 1. Proceeding to return error.")
+	if id < 1 {
+		qs.logger.Println("Subject id is less than 1. Proceeding to return error.")
 		return nil, pkg.ErrSubjectNotFound
 	}
 	qs.logger.Println("Successfully got subject by id. Proceeding to get subject.")
