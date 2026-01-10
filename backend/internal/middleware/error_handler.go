@@ -35,7 +35,8 @@ func CustomHTTPErrorHandler(err error, c echo.Context) {
 		// Map known application errors to appropriate status codes
 		switch err {
 		case pkg.ErrSubjectNotFound, pkg.ErrQuestionNotFound,
-			pkg.ErrQuestionOptionNotFound, pkg.ErrQuizNotFound, pkg.ErrUserNotFound:
+			pkg.ErrQuestionOptionNotFound, pkg.ErrQuizNotFound, pkg.ErrUserNotFound,
+			pkg.ErrUserRankNotFound:
 			code = http.StatusNotFound
 			message = err.Error()
 		case pkg.ErrInvalidName, pkg.ErrInvalidEmail, pkg.ErrInvalidUserID,

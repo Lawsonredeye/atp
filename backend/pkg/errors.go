@@ -23,4 +23,5 @@ var (
 	ErrUnauthorized               = errors.New("unauthorized")
 	ErrUserAlreadyExists          = errors.New("email already exists")
 	ErrInvalidQuestionID          = errors.New("invalid question id")
+	ErrUserRankNotFound           = errors.New("user has no quiz scores yet")
 )
