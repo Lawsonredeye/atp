@@ -37,7 +37,7 @@ func main() {
 	questionService := service.NewQuestionService(questionRepository, subjectRepository, logger)
 
 	// Getting all handlers
-	adminHandler := handler.NewAdminHandler(userService, questionService)
+	adminHandler := handler.NewAdminHandler(userService, questionService, logger)
 	userHandler := handler.NewUserHandler(userService, logger, cfg.Server.JWTSecret)
 	quizHandler := handler.NewQuizHandler(quizService, subjectService, logger)
 

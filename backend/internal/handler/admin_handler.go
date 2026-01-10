@@ -18,10 +18,11 @@ type AdminHandler struct {
 	logger          *log.Logger
 }
 
-func NewAdminHandler(userService service.UserServiceInterface, questionService service.QuestionService) *AdminHandler {
+func NewAdminHandler(userService service.UserServiceInterface, questionService service.QuestionService, logger *log.Logger) *AdminHandler {
 	return &AdminHandler{
 		userService:     userService,
 		questionService: questionService,
+		logger:          logger,
 	}
 }
 
@@ -55,7 +56,7 @@ func (ah *AdminHandler) CreateBulkQuestions(c echo.Context) error {
 // UploadSingleQuestion uploads a single question and its options and answers.
 // It returns an error if any.
 func (ah *AdminHandler) UploadSingleQuestion(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
@@ -88,7 +89,7 @@ func (ah *AdminHandler) UploadSingleQuestion(c echo.Context) error {
 }
 
 func (ah *AdminHandler) GetAllQuestions(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
@@ -103,12 +104,12 @@ func (ah *AdminHandler) GetAllQuestions(c echo.Context) error {
 }
 
 func (ah *AdminHandler) GetQuestionById(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
 	}
-	questionId := c.QueryParam("question_id")
+	questionId := c.Param("id")
 	if questionId == "" {
 		ah.logger.Println("question id is empty. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrQuestionNotFound, http.StatusBadRequest)
@@ -128,7 +129,7 @@ func (ah *AdminHandler) GetQuestionById(c echo.Context) error {
 }
 
 func (ah *AdminHandler) GetQuestionOptions(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
@@ -153,7 +154,7 @@ func (ah *AdminHandler) GetQuestionOptions(c echo.Context) error {
 }
 
 func (ah *AdminHandler) DeleteQuestionById(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
@@ -230,12 +231,12 @@ func (ah *AdminHandler) CreateSubject(c echo.Context) error {
 // @Failure 500 {object} pkg.ErrorResponse
 // @Router /admin/subject [get]
 func (ah *AdminHandler) GetSubjectById(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole, _ := middleware.GetUserRole(c)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
 	}
-	subjectId := c.QueryParam("subject_id")
+	subjectId := c.Param("id")
 	if subjectId == "" {
 		ah.logger.Println("subject id is empty. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrSubjectNotFound, http.StatusBadRequest)
@@ -265,7 +266,7 @@ func (ah *AdminHandler) GetSubjectById(c echo.Context) error {
 // @Failure 500 {object} pkg.ErrorResponse
 // @Router /admin/subject [get]
 func (ah *AdminHandler) GetAllSubjects(c echo.Context) error {
-	userRole := c.Get("user_role").(string)
+	userRole := c.Get("role").(string)
 	if userRole != "admin" {
 		ah.logger.Println("user is not admin. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrUnauthorized, http.StatusUnauthorized)
