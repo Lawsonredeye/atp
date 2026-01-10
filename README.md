@@ -101,12 +101,124 @@ All protected routes require `Authorization: Bearer <token>` header.
 | GET    | `/api/v1/admin/subject/:id`  | Get subject by ID    |
 | POST   | `/api/v1/admin/subject`      | Create a new subject |
 
+#### User Profile
+
+| Method | Endpoint                  | Description            |
+|--------|--------------------------|------------------------|
+| GET    | `/api/v1/dashboard`        | Get user dashboard     |
+| PUT    | `/api/v1/user/username`    | Update username        |
+| PUT    | `/api/v1/user/email`       | Update email           |
+| PUT    | `/api/v1/user/password`    | Update password        |
+| DELETE | `/api/v1/user/account`     | Delete user account    |
+
 #### Quiz
 
 | Method | Endpoint              | Description      |
 |--------|-----------------------|------------------|
 | POST   | `/api/v1/quiz/create`  | Create a quiz    |
-| GET    | `/api/v1/quiz/submit`  | Submit a quiz    |
+| POST   | `/api/v1/quiz/submit`  | Submit a quiz    |
+
+#### Leaderboard
+
+| Method | Endpoint                           | Description                    |
+|--------|------------------------------------|--------------------------------|
+| GET    | `/api/v1/leaderboard`              | Get global leaderboard         |
+| GET    | `/api/v1/leaderboard/me`           | Get authenticated user's rank  |
+| GET    | `/api/v1/leaderboard/user/:user_id`| Get specific user's rank       |
+
+**Query Parameters:**
+
+| Parameter    | Type   | Default    | Description                                      |
+|--------------|--------|------------|--------------------------------------------------|
+| `subject_id` | int    | -          | Filter leaderboard by subject                    |
+| `period`     | string | `all_time` | Time period: `all_time`, `weekly`, `monthly`     |
+| `limit`      | int    | 10         | Number of entries to return (max: 100)           |
+| `offset`     | int    | 0          | Pagination offset                                |
+
+**Example Requests:**
+
+```bash
+# Get global leaderboard (top 10, all time)
+GET /api/v1/leaderboard
+
+# Get weekly leaderboard with top 20 users
+GET /api/v1/leaderboard?period=weekly&limit=20
+
+# Get leaderboard for Mathematics subject (subject_id=1)
+GET /api/v1/leaderboard?subject_id=1
+
+# Get monthly leaderboard for a subject with pagination
+GET /api/v1/leaderboard?subject_id=1&period=monthly&limit=10&offset=10
+
+# Get my rank on the global leaderboard
+GET /api/v1/leaderboard/me
+
+# Get my rank for a specific subject
+GET /api/v1/leaderboard/me?subject_id=1
+
+# Get another user's rank
+GET /api/v1/leaderboard/user/5
+
+# Get another user's rank for a specific subject
+GET /api/v1/leaderboard/user/5?subject_id=1
+```
+
+**Example Response - Leaderboard:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "subject_id": 1,
+    "subject_name": "Mathematics",
+    "period": "all_time",
+    "total_users": 150,
+    "entries": [
+      {
+        "rank": 1,
+        "user_id": 42,
+        "user_name": "John Doe",
+        "total_score": 850,
+        "total_quizzes": 25,
+        "correct_answers": 170,
+        "total_questions": 200,
+        "accuracy_percent": 85.0
+      }
+    ]
+  }
+}
+```
+
+**Example Response - User Rank:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "user_id": 5,
+    "user_name": "Jane Smith",
+    "rank": 12,
+    "total_score": 420,
+    "total_quizzes": 15,
+    "correct_answers": 84,
+    "total_questions": 100,
+    "accuracy_percent": 84.0,
+    "total_users": 150
+  }
+}
+```
+
+**Error Response (User has no scores):**
+
+```json
+{
+  "success": false,
+  "error": "user has no quiz scores yet",
+  "status": 404
+}
+```
+- `limit` (optional): Number of entries (default: 10, max: 100)
+- `offset` (optional): Pagination offset
 
 ## Database Schema
 
@@ -170,6 +282,9 @@ otterprep/
 - ✅ Quiz generation by subject
 - ✅ Score tracking
 - ✅ Bulk question upload
+- ✅ User profile management
+- ✅ Leaderboard system (global, subject-specific, weekly, monthly)
+- ✅ User dashboard with stats
 
 ## License
 
