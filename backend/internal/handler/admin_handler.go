@@ -34,7 +34,10 @@ func (ah *AdminHandler) CreateBulkQuestions(c echo.Context) error {
 		ah.logger.Println("error binding questions: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
-	subjectId := c.QueryParam("subject_id")
+	if err := c.Validate(&questions); err != nil {
+		return err
+	}
+	subjectId := c.Param("subject_id")
 	if subjectId == "" {
 		ah.logger.Println("subject id is empty. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrSubjectNotFound, http.StatusBadRequest)
@@ -69,7 +72,7 @@ func (ah *AdminHandler) UploadSingleQuestion(c echo.Context) error {
 	if err := c.Validate(&question); err != nil {
 		return err
 	}
-	subjectId := c.QueryParam("subject_id")
+	subjectId := c.Param("subject_id")
 	if subjectId == "" {
 		ah.logger.Println("subject id is empty. Proceeding to return error.")
 		return pkg.ErrorResponse(c, pkg.ErrSubjectNotFound, http.StatusBadRequest)
@@ -85,7 +88,7 @@ func (ah *AdminHandler) UploadSingleQuestion(c echo.Context) error {
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
 	}
 	ah.logger.Println("Successfully created question. Proceeding to return success response.")
-	return pkg.SuccessResponse(c, nil, http.StatusOK)
+	return pkg.SuccessResponse(c, nil, http.StatusCreated)
 }
 
 func (ah *AdminHandler) GetAllQuestions(c echo.Context) error {
