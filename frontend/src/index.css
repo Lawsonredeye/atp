@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  --color-primary: #FF6B35;
+  --color-primary-dark: #E55A2B;
+  --color-secondary: #004E89;
+  --color-secondary-light: #1A6FB5;
+  --color-accent-yellow: #FFD23F;
+  --color-accent-green: #3DDC84;
+  --color-accent-red: #FF3366;
+  --color-accent-purple: #7B2CBF;
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-cream: #FFF8E7;
+  --color-gray-light: #E5E5E5;
+  --color-gray: #888888;
+}
+
+@theme {
+  --color-primary: #FF6B35;
+  --color-primary-dark: #E55A2B;
+  --color-secondary: #004E89;
+  --color-secondary-light: #1A6FB5;
+  --color-accent-yellow: #FFD23F;
+  --color-accent-green: #3DDC84;
+  --color-accent-red: #FF3366;
+  --color-accent-purple: #7B2CBF;
+  --color-cream: #FFF8E7;
+  --color-gray-light: #E5E5E5;
+  --color-gray: #888888;
+  --font-display: 'Space Grotesk', 'Arial Black', sans-serif;
+  --font-body: 'Space Grotesk', 'Arial', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --shadow-brutal: 4px 4px 0px 0px #000000;
+  --shadow-brutal-sm: 2px 2px 0px 0px #000000;
+  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
+}
+
+* {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-black);
+  background-color: var(--color-cream);
+}
