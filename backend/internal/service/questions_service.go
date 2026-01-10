@@ -186,39 +186,9 @@ func (qs *questionService) CreateMultipleQuestionBySubjectID(ctx context.Context
 		return pkg.ErrSubjectNotFound
 	}
 	for _, question := range questions {
-		id, err := qs.CreateQuestion(ctx, subjectId, question)
+		_, err := qs.CreateQuestion(ctx, subjectId, question)
 		if err != nil {
 			qs.logger.Println("Failed to create question: ", err)
-			break
-		}
-		for _, option := range question.Options {
-			isCorrect := false
-			if option == question.Answer {
-				isCorrect = true
-			}
-			now := time.Now()
-			_, err = qs.CreateQuestionOption(ctx, repository.QuestionOptions{
-				QuestionId: id,
-				Option:     option,
-				CreatedAt:  now,
-				UpdatedAt:  now,
-				IsCorrect:  isCorrect,
-			})
-			if err != nil {
-				qs.logger.Println("Failed to create question option: ", err)
-				break
-			}
-		}
-		now := time.Now()
-		_, err = qs.questionRepository.CreateAnswer(ctx, repository.Answers{
-			QuestionId: id,
-			Answer:     question.Explanation,
-			CreatedAt:  now,
-			UpdatedAt:  now,
-		})
-		if err != nil {
-			qs.logger.Println("Failed to create answer: ", err)
-			break
 		}
 	}
 	qs.logger.Println("Successfully created questions")

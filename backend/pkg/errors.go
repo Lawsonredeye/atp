@@ -3,6 +3,7 @@ package pkg
 import "errors"
 
 var (
+	ErrQuestionAlreadyExist       = errors.New("question already exist")
 	ErrSubjectNotFound            = errors.New("subject not found")
 	ErrQuestionNotFound           = errors.New("question not found")
 	ErrQuestionOptionNotFound     = errors.New("question option not found")

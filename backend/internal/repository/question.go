@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/lawson/otterprep/pkg"
 )
 
 // This handles the database operations for fetching questions and its answers.
@@ -64,7 +66,8 @@ func (qr *questionRepository) CreateQuestion(ctx context.Context, question Quest
 	var id int64
 	err := qr.db.QueryRowContext(ctx, query, question.SubjectId, question.Question, question.IsMultipleChoice, question.CreatedAt, question.UpdatedAt).Scan(&id)
 	if err != nil {
-		return 0, err
+		fmt.Println(err)
+		return 0, pkg.ErrQuestionAlreadyExist
 	}
 	return id, nil
 }
