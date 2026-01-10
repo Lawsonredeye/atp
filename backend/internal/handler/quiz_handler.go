@@ -66,27 +66,25 @@ func (h *QuizHandler) CreateQuiz(c echo.Context) error {
 // @Tags Quizzes
 // @Accept JSON
 // @Produce JSON
-// @Param quiz body domain.Quiz true "Quiz"
-// @Success 200 {object} map[string]interface{}
+// @Param quiz body []domain.SubmitQuizRequest true "Quiz Submission"
+// @Success 200 {object} domain.QuizSubmitResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /quizzes/submit [post]
 func (h *QuizHandler) SubmitQuiz(c echo.Context) error {
-	var quizRequest []service.QuizRequest
+	var quizRequest []domain.SubmitQuizRequest
 	if err := c.Bind(&quizRequest); err != nil {
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
+	if err := c.Validate(&quizRequest); err != nil {
+		return err
+	}
 
 	userId := c.Get("user_id").(int64)
-	quiz, score, err := h.quizService.SubmitQuiz(c.Request().Context(), userId, quizRequest)
+	result, err := h.quizService.SubmitQuiz(c.Request().Context(), userId, quizRequest)
 	if err != nil {
 		h.logger.Println("error submitting quiz: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
-	}
-	result := map[string]interface{}{
-		"quiz":   quiz,
-		"score":  score,
-		"userId": userId,
 	}
 	return pkg.SuccessResponse(c, result, http.StatusOK)
 }

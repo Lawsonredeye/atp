@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lawson/otterprep/domain"
 	"github.com/lawson/otterprep/internal/repository"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -230,27 +231,27 @@ func TestSubmitQuiz(t *testing.T) {
 	//assert.Equal(t, 3, len(quiz))
 	fmt.Println("quiz: ", quiz)
 
-	quizRequest := []QuizRequest{
+	quizRequest := []domain.SubmitQuizRequest{
 		{
-			QuizId:           1,
+			QuestionId:       1,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{1},
 		},
 		{
-			QuizId:           2,
+			QuestionId:       2,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{2},
 		},
 		{
-			QuizId:           3,
+			QuestionId:       3,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{1},
 		},
 	}
 	userID := int64(1)
-	result, score, err := qs.SubmitQuiz(ctx, userID, quizRequest)
+	result, err := qs.SubmitQuiz(ctx, userID, quizRequest)
 	assert.Nil(t, err)
-	assert.Equal(t, int64(1), score)
+	assert.Equal(t, int64(1), result.Score)
 	fmt.Println("result: ", result)
 
 	// Verify score is saved
@@ -285,30 +286,30 @@ func TestCalculateQuizScore(t *testing.T) {
 	createdQuiz, err := qr.GetQuizById(ctx, 1)
 	assert.Nil(t, err)
 	fmt.Println("created quiz: ", createdQuiz)
-	quizRequest := []QuizRequest{
+	quizRequest := []domain.SubmitQuizRequest{
 		{
-			QuizId:           1,
+			QuestionId:       1,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{1},
 		},
 		{
-			QuizId:           2,
+			QuestionId:       2,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{2},
 		},
 		{
-			QuizId:           3,
+			QuestionId:       3,
 			IsMultipleChoice: true,
 			OptionIds:        []int64{1},
 		},
 	}
 	userID := int64(1)
-	result, score, err := qs.SubmitQuiz(ctx, userID, quizRequest)
+	result, err := qs.SubmitQuiz(ctx, userID, quizRequest)
 	assert.Nil(t, err)
-	assert.Equal(t, int64(1), score)
+	assert.Equal(t, int64(1), result.Score)
 	fmt.Println("result: ", result)
 
 	numOfQuestions := len(quizRequest)
-	finalScore := qs.CalculateQuizScore(ctx, int64(numOfQuestions), score)
+	finalScore := qs.CalculateQuizScore(ctx, int64(numOfQuestions), result.Score)
 	assert.Equal(t, int64(33), finalScore)
 }

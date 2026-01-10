@@ -11,12 +11,6 @@ import (
 	"github.com/lawson/otterprep/pkg"
 )
 
-type QuizRequest struct {
-	QuizId           int64   `json:"quiz_id"`
-	IsMultipleChoice bool    `json:"is_multiple_choice"`
-	OptionIds        []int64 `json:"option_ids"`
-}
-
 type quizService struct {
 	quizRepository     repository.QuizRepository
 	subjectRepository  repository.SubjectRepository
@@ -25,8 +19,8 @@ type quizService struct {
 }
 
 type QuizService interface {
-	GenerateQuizBySubjectID(ctx context.Context, subjectId int64, numOfQuestions int64) ([]repository.Quiz, error)
-	SubmitQuiz(ctx context.Context, userID int64, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error)
+	GenerateQuizBySubjectID(ctx context.Context, subjectId int64, numOfQuestions int64) (*domain.GeneratedQuizResponse, error)
+	SubmitQuiz(ctx context.Context, userID int64, quizRequest []domain.SubmitQuizRequest) (*domain.QuizSubmitResponse, error)
 	CalculateQuizScore(ctx context.Context, numOfQuestions int64, score int64) int64
 }
 
@@ -37,33 +31,55 @@ func NewQuizService(quizRepository repository.QuizRepository, subjectRepository 
 // GenerateQuizBySubjectID generates a quiz based on the subject ID and number of questions
 // if subject is found then it returns the number of questions based on numOfQuestions.
 // if subject is not found then it returns an error.
-func (qs *quizService) GenerateQuizBySubjectID(ctx context.Context, subjectId int64, numOfQuestions int64) ([]repository.Quiz, error) {
-	var quiz []repository.Quiz
+func (qs *quizService) GenerateQuizBySubjectID(ctx context.Context, subjectId int64, numOfQuestions int64) (*domain.GeneratedQuizResponse, error) {
+	var questions []domain.QuizQuestionResponse
+	usedQuestionIds := make(map[int64]bool)
 
 	for i := 0; i < int(numOfQuestions); i++ {
-		question, err := qs.questionRepository.GetRandomQuestion(ctx, subjectId)
-		if err != nil {
-			fmt.Println("error getting quiz: ", err)
-			return nil, pkg.ErrSubjectNotFound
+		// Keep trying to get a unique question
+		var question *repository.Questions
+		var err error
+		maxRetries := 10
+		for retry := 0; retry < maxRetries; retry++ {
+			question, err = qs.questionRepository.GetRandomQuestion(ctx, subjectId)
+			if err != nil {
+				fmt.Println("error getting quiz: ", err)
+				return nil, pkg.ErrSubjectNotFound
+			}
+			if !usedQuestionIds[question.Id] {
+				usedQuestionIds[question.Id] = true
+				break
+			}
 		}
 
-		questionOption, err := qs.questionRepository.GetQuestionOptions(ctx, question.Id)
+		questionOptions, err := qs.questionRepository.GetQuestionOptions(ctx, question.Id)
 		if err != nil {
-			// log error here
 			return nil, pkg.ErrQuestionOptionNotFound
 		}
 
-		quiz = append(quiz, repository.Quiz{
+		// Convert options without exposing is_correct
+		options := make([]domain.QuizOptionResponse, len(questionOptions))
+		for j, opt := range questionOptions {
+			options[j] = domain.QuizOptionResponse{
+				Id:     opt.Id,
+				Option: opt.Option,
+			}
+		}
+
+		questions = append(questions, domain.QuizQuestionResponse{
+			QuestionId:       question.Id,
 			Question:         question.Question,
 			SubjectId:        question.SubjectId,
 			IsMultipleChoice: question.IsMultipleChoice,
-			QuestionOptions:  questionOption,
-			CreatedAt:        question.CreatedAt,
-			UpdatedAt:        question.UpdatedAt,
+			Options:          options,
 		})
 	}
 
-	return quiz, nil
+	return &domain.GeneratedQuizResponse{
+		SubjectId:  subjectId,
+		TotalCount: len(questions),
+		Questions:  questions,
+	}, nil
 }
 
 func (qs *quizService) GetQuizById(ctx context.Context, id int64) (*repository.Quiz, error) {
@@ -72,22 +88,22 @@ func (qs *quizService) GetQuizById(ctx context.Context, id int64) (*repository.Q
 
 // SubmitQuiz takes a list of quiz request and checks to see if the request questions
 // has the correct options selected.
-func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest []QuizRequest) ([]domain.QuizResponse, int64, error) {
+func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest []domain.SubmitQuizRequest) (*domain.QuizSubmitResponse, error) {
 	score := int64(0)
 	correctAnswers := int64(0)
 	incorrectAnswers := int64(0)
 	if len(quizRequest) == 0 {
-		return nil, 0, nil
+		return nil, nil
 	}
-	result := make([]domain.QuizResponse, 0)
+	results := make([]domain.QuizResultResponse, 0)
 
 	var subjectID int64
 
 	for _, quiz := range quizRequest {
-		question, err := qs.questionRepository.GetQuestionById(ctx, quiz.QuizId)
+		question, err := qs.questionRepository.GetQuestionById(ctx, quiz.QuestionId)
 		if err != nil {
 			fmt.Println("error getting quiz: ", err)
-			break
+			continue
 		}
 
 		// Capture subjectID from the first question found
@@ -95,35 +111,40 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest
 			subjectID = question.SubjectId
 		}
 
-		answer, err := qs.questionRepository.GetAnswerById(ctx, quiz.QuizId)
+		answer, err := qs.questionRepository.GetAnswerById(ctx, quiz.QuestionId)
 		if err != nil {
 			fmt.Println("error getting answer: ", err)
 		}
-		correctOption, err := qs.questionRepository.GetCorrectQuestionOptionByQuestionID(ctx, quiz.QuizId)
+		correctOption, err := qs.questionRepository.GetCorrectQuestionOptionByQuestionID(ctx, quiz.QuestionId)
 		if err != nil {
 			fmt.Println("error getting question options: ", err)
 		}
 
-		if slices.Contains(quiz.OptionIds, correctOption.Id) {
+		isCorrect := slices.Contains(quiz.OptionIds, correctOption.Id)
+		if isCorrect {
 			score++
 			correctAnswers++
 		} else {
 			incorrectAnswers++
 		}
 
-		opts := make([]string, 0)
+		// Get selected option texts
+		selectedOpts := make([]string, 0)
 		for _, optionId := range quiz.OptionIds {
 			questionOption, err := qs.questionRepository.GetQuestionOptionsById(ctx, optionId)
 			if err != nil {
 				fmt.Println("error getting question options: ", err)
+				continue
 			}
-			opts = append(opts, questionOption.Option)
+			selectedOpts = append(selectedOpts, questionOption.Option)
 		}
-		result = append(result, domain.QuizResponse{
+
+		results = append(results, domain.QuizResultResponse{
 			QuestionId:      question.Id,
 			Question:        question.Question,
-			SelectedOptions: opts,
-			Answer:          correctOption.Option,
+			SelectedOptions: selectedOpts,
+			CorrectAnswer:   correctOption.Option,
+			IsCorrect:       isCorrect,
 			Explanation:     answer.Answer,
 		})
 	}
@@ -143,14 +164,18 @@ func (qs *quizService) SubmitQuiz(ctx context.Context, userID int64, quizRequest
 	})
 	if err != nil {
 		fmt.Println("error storing score: ", err)
-		// We log but maybe don't fail the request? Or should we?
-		// For MVP, logging is okay, but ideally we return error.
-		// Use ErrInternalServerError?
-		// "SubmitQuiz" signature returns error. Let's return error.
-		return result, score, err
+		return nil, err
 	}
 
-	return result, score, nil
+	return &domain.QuizSubmitResponse{
+		UserId:           userID,
+		SubjectId:        subjectID,
+		TotalQuestions:   int64(len(quizRequest)),
+		CorrectAnswers:   correctAnswers,
+		IncorrectAnswers: incorrectAnswers,
+		Score:            score,
+		Results:          results,
+	}, nil
 }
 
 // CalculateQuizScore takes a number of questions and a score and returns the percentage of the score.

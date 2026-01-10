@@ -2,23 +2,60 @@ package domain
 
 import "errors"
 
+// SubmitQuizRequest is used when submitting quiz answers
 type SubmitQuizRequest struct {
-	QuizId           int64   `json:"quiz_id" validate:"required,gt=0"`
+	QuestionId       int64   `json:"question_id" validate:"required,gt=0"`
 	IsMultipleChoice bool    `json:"is_multiple_choice"`
 	OptionIds        []int64 `json:"option_ids" validate:"required,min=1,dive,gt=0"`
 }
 
+// QuizRequest is used when requesting to generate a quiz
 type QuizRequest struct {
 	SubjectId      int64 `json:"subject_id" validate:"required,gt=0"`
 	NumOfQuestions int64 `json:"num_of_questions" validate:"required,gte=1,lte=100"`
 }
 
-type QuizResponse struct {
-	QuestionId      int64
-	Question        string
-	SelectedOptions []string
-	Answer          string
-	Explanation     string
+// QuizOptionResponse represents an option without revealing if it's correct
+type QuizOptionResponse struct {
+	Id     int64  `json:"id"`
+	Option string `json:"option"`
+}
+
+// QuizQuestionResponse represents a question in a generated quiz (for frontend)
+type QuizQuestionResponse struct {
+	QuestionId       int64                `json:"question_id"`
+	Question         string               `json:"question"`
+	SubjectId        int64                `json:"subject_id"`
+	IsMultipleChoice bool                 `json:"is_multiple_choice"`
+	Options          []QuizOptionResponse `json:"options"`
+}
+
+// GeneratedQuizResponse is the response when generating a quiz
+type GeneratedQuizResponse struct {
+	SubjectId  int64                  `json:"subject_id"`
+	TotalCount int                    `json:"total_count"`
+	Questions  []QuizQuestionResponse `json:"questions"`
+}
+
+// QuizResultResponse is the response after submitting a quiz (reveals answers)
+type QuizResultResponse struct {
+	QuestionId      int64    `json:"question_id"`
+	Question        string   `json:"question"`
+	SelectedOptions []string `json:"selected_options"`
+	CorrectAnswer   string   `json:"correct_answer"`
+	IsCorrect       bool     `json:"is_correct"`
+	Explanation     string   `json:"explanation"`
+}
+
+// QuizSubmitResponse is the full response after submitting a quiz
+type QuizSubmitResponse struct {
+	UserId           int64                `json:"user_id"`
+	SubjectId        int64                `json:"subject_id"`
+	TotalQuestions   int64                `json:"total_questions"`
+	CorrectAnswers   int64                `json:"correct_answers"`
+	IncorrectAnswers int64                `json:"incorrect_answers"`
+	Score            int64                `json:"score"`
+	Results          []QuizResultResponse `json:"results"`
 }
 
 type QuestionsData struct {
