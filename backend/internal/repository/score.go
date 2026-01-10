@@ -23,18 +23,17 @@ func NewScoreRepository(db *sql.DB) ScoreRepository {
 
 // StoreUserScore stores a user's score.
 func (sr *scoreRepository) StoreUserScore(ctx context.Context, userScore domain.UserScore) (*domain.UserScore, error) {
-	query := "INSERT INTO scores (user_id, score, mode, correct_answers, incorrect_answers, total_questions, time_taken_seconds, subject_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	result, err := sr.db.ExecContext(ctx, query, userScore.UserID, userScore.Score, userScore.Mode, userScore.CorrectAnswers, userScore.IncorrectAnswers, userScore.TotalQuestions, userScore.TimeTakenSeconds, userScore.SubjectID, userScore.CreatedAt, userScore.UpdatedAt)
+	query := "INSERT INTO scores (user_id, score, mode, correct_answers, incorrect_answers, total_questions, time_taken_seconds, subject_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id"
+	err := sr.db.QueryRowContext(ctx, query, userScore.UserID, userScore.Score, userScore.Mode, userScore.CorrectAnswers, userScore.IncorrectAnswers, userScore.TotalQuestions, userScore.TimeTakenSeconds, userScore.SubjectID, userScore.CreatedAt, userScore.UpdatedAt).Scan(&userScore.ID)
 	if err != nil {
 		return nil, err
 	}
-	userScore.ID, err = result.LastInsertId()
 	return &userScore, nil
 }
 
 // GetUserScoreById returns a user's score by id.
 func (sr *scoreRepository) GetUserScoreById(ctx context.Context, id int64) (*domain.UserScore, error) {
-	query := "SELECT id, user_id, score, mode, correct_answers, incorrect_answers, total_questions, time_taken_seconds, subject_id, created_at, updated_at FROM scores WHERE id = ?"
+	query := "SELECT id, user_id, score, mode, correct_answers, incorrect_answers, total_questions, time_taken_seconds, subject_id, created_at, updated_at FROM scores WHERE id = $1"
 	row := sr.db.QueryRowContext(ctx, query, id)
 	var userScore domain.UserScore
 	err := row.Scan(&userScore.ID, &userScore.UserID, &userScore.Score, &userScore.Mode, &userScore.CorrectAnswers, &userScore.IncorrectAnswers, &userScore.TotalQuestions, &userScore.TimeTakenSeconds, &userScore.SubjectID, &userScore.CreatedAt, &userScore.UpdatedAt)
@@ -47,7 +46,7 @@ func (sr *scoreRepository) GetUserScoreById(ctx context.Context, id int64) (*dom
 // GetUserOverallScoreStats returns the overall score stats for a user.
 // It returns the total number of quizzes taken, total correct answers, total incorrect answers, and total questions answered inside a UserStats struct.
 func (sr *scoreRepository) GetUserOverallScoreStats(ctx context.Context, userID int64) (*domain.UserStats, error) {
-	query := "SELECT user_id, total_questions, correct_answers, incorrect_answers FROM scores WHERE user_id = ?"
+	query := "SELECT user_id, total_questions, correct_answers, incorrect_answers FROM scores WHERE user_id = $1"
 	rows, err := sr.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err

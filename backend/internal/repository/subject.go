@@ -57,12 +57,13 @@ func (sr *subjectRepository) GetSubjectById(ctx context.Context, id int64) (*Sub
 
 func (sr *subjectRepository) CreateSubject(ctx context.Context, subject Subject) (int64, error) {
 	name := strings.ToLower(subject.Name)
-	query := "INSERT INTO subjects (name, created_at, updated_at) VALUES ($1, $2, $3)"
-	result, err := sr.db.ExecContext(ctx, query, name, subject.CreatedAt, subject.UpdatedAt)
+	query := "INSERT INTO subjects (name, created_at, updated_at) VALUES ($1, $2, $3) RETURNING id"
+	var id int64
+	err := sr.db.QueryRowContext(ctx, query, name, subject.CreatedAt, subject.UpdatedAt).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return result.LastInsertId()
+	return id, nil
 }
 
 func (sr *subjectRepository) UpdateSubjectById(ctx context.Context, id int64, subject Subject) (*Subject, error) {

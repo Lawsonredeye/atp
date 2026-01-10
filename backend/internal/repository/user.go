@@ -30,17 +30,13 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 // CreateUser creates a new user in the database.
 func (ur *UserRepository) CreateUser(ctx context.Context, user domain.User) (*domain.User, error) {
-	query := "INSERT INTO users (name, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+	query := "INSERT INTO users (name, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	passwordHash, err := pkg.HashPassword(user.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
 	user.PasswordHash = passwordHash
-	result, err := ur.db.ExecContext(ctx, query, user.Name, user.Email, user.PasswordHash, user.CreatedAt, user.UpdatedAt)
-	if err != nil {
-		return nil, err
-	}
-	user.ID, err = result.LastInsertId()
+	err = ur.db.QueryRowContext(ctx, query, user.Name, user.Email, user.PasswordHash, user.CreatedAt, user.UpdatedAt).Scan(&user.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -44,18 +44,14 @@ func (qr *quizRepository) CreateQuiz(ctx context.Context, quiz Quiz) (int64, err
 		return 0, errors.New("subject not found")
 	}
 
-	query = "INSERT INTO questions (subject_id, question, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-	res, err := qr.db.ExecContext(ctx, query, id, quiz.Question, quiz.IsMultipleChoice, quiz.CreatedAt, quiz.UpdatedAt)
-	if err != nil {
-		return 0, err
-	}
-	// loop through the question options and create them
-	createdId, err := res.LastInsertId()
+	query = "INSERT INTO questions (subject_id, question, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	var createdId int64
+	err := qr.db.QueryRowContext(ctx, query, id, quiz.Question, quiz.IsMultipleChoice, quiz.CreatedAt, quiz.UpdatedAt).Scan(&createdId)
 	if err != nil {
 		return 0, err
 	}
 	for _, option := range quiz.QuestionOptions {
-		query = "INSERT INTO question_options (question_id, option, is_correct, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
+		query = "INSERT INTO options (question_id, option, is_correct, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
 		if _, err := qr.db.ExecContext(ctx, query, createdId, option.Option, option.IsCorrect, option.CreatedAt, option.UpdatedAt); err != nil {
 			return 0, err
 		}
@@ -89,7 +85,7 @@ func (qr *quizRepository) GetQuizById(ctx context.Context, id int64) (*Quiz, err
 	if err != nil {
 		return nil, err
 	}
-	query = "SELECT id, question_id, option, is_correct, created_at, updated_at FROM question_options WHERE question_id = $1"
+	query = "SELECT id, question_id, option, is_correct, created_at, updated_at FROM options WHERE question_id = $1"
 	rows, err := qr.db.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err

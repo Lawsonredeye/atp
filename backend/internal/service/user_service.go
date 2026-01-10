@@ -19,8 +19,9 @@ type UserServiceInterface interface {
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 	DeleteUserByID(ctx context.Context, userId int64) error
-	Login(ctx context.Context, email string, password string) (*domain.User, error)
+	Login(ctx context.Context, email string, password string) (*domain.UserResponse, error)
 	UserDashboard(ctx context.Context, userId int64) (*domain.UserDashboard, error)
+	GetUserRoles(ctx context.Context, userId int64) ([]string, error)
 }
 
 type userService struct {
@@ -51,6 +52,11 @@ func (s *userService) CreateUserAccount(ctx context.Context, user domain.User, r
 		s.logger.Println("error creating user: ", pkg.ErrInvalidPasswordLength)
 		return nil, pkg.ErrInvalidPasswordLength
 	}
+	s.logger.Printf("checking if user with email already exists: %s", pkg.ObfuscateDetail(user.Email, "email"))
+	if _, err := s.userRepo.GetUserByEmail(ctx, user.Email); err == nil {
+		s.logger.Println("error creating user as user already exist")
+		return nil, pkg.ErrUserAlreadyExists
+	}
 	createdUser, err := s.userRepo.CreateUser(ctx, user)
 	if err != nil {
 		s.logger.Println("error creating user: ", err)
@@ -65,7 +71,7 @@ func (s *userService) CreateUserAccount(ctx context.Context, user domain.User, r
 		return nil, err
 	}
 	createdUser.PasswordHash = ""
-	s.logger.Println("created user: ", createdUser)
+	s.logger.Println("created user: ", pkg.ObfuscateDetail(createdUser.Name, "name"))
 	return createdUser, nil
 }
 
@@ -178,7 +184,7 @@ func (s *userService) UpdatePassword(ctx context.Context, userId int64, newPassw
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, email string, password string) (*domain.User, error) {
+func (s *userService) Login(ctx context.Context, email string, password string) (*domain.UserResponse, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		s.logger.Println("error getting user: ", err)
@@ -192,8 +198,15 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 		s.logger.Println("password does not match")
 		return nil, pkg.ErrInvalidPasswordHash
 	}
+	user.PasswordHash = ""
 	s.logger.Println("user logged in: ", user)
-	return user, nil
+	return &domain.UserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}, nil
 }
 
 func (s *userService) GetUserRoles(ctx context.Context, userId int64) ([]string, error) {

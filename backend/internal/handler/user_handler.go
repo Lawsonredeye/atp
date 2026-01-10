@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -59,6 +61,15 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 	createdUser, err := h.userService.CreateUserAccount(c.Request().Context(), newUser, domain.UserUser)
 	if err != nil {
 		h.logger.Println("error creating user: ", err)
+		if errors.Is(err, pkg.ErrUserAlreadyExists) {
+			return pkg.ErrorResponse(c, err, http.StatusConflict)
+		}
+		if errors.Is(err, pkg.ErrInvalidPasswordLength) {
+			return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+		}
+		if errors.Is(err, pkg.ErrInvalidName) {
+			return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+		}
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
 	}
 	h.logger.Printf("created user with email: %s", pkg.ObfuscateDetail(createdUser.Email, "email"))
@@ -90,11 +101,13 @@ func (h *UserHandler) CreateUserAdmin(c echo.Context) error {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-
 	h.logger.Printf("registering new user with email: %s", pkg.ObfuscateDetail(user.Email, "email"))
 	createdUser, err := h.userService.CreateUserAccount(c.Request().Context(), newUser, domain.UserAdmin)
 	if err != nil {
 		h.logger.Println("error creating user: ", err)
+		if errors.Is(err, pkg.ErrUserAlreadyExists) {
+			return pkg.ErrorResponse(c, err, http.StatusConflict)
+		}
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
 	}
 	h.logger.Printf("created user with email: %s", pkg.ObfuscateDetail(createdUser.Email, "email"))
@@ -130,6 +143,55 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
 	}
 	refreshToken, err := pkg.GenerateRefreshToken(loginUser.ID, domain.UserUser, refreshTokenExpiry, h.secret)
+	if err != nil {
+		h.logger.Println("error generating token: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
+	}
+	data := map[string]interface{}{
+		"user":          loginUser,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
+	return pkg.SuccessResponse(c, data, http.StatusOK)
+}
+
+// AdminLogin logs in a user
+// @Summary Login a user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body domain.LoginUser true "User"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/login [post]
+func (h *UserHandler) AdminLogin(c echo.Context) error {
+	var user domain.LoginUser
+	err := c.Bind(&user)
+	if err != nil {
+		h.logger.Println("error binding user: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	loginUser, err := h.userService.Login(c.Request().Context(), user.Email, user.Password)
+	if err != nil {
+		h.logger.Println("error logging in user: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
+	}
+	roles, err := h.userService.GetUserRoles(c.Request().Context(), loginUser.ID)
+	if err != nil {
+		return err
+	}
+	if slices.Contains(roles, domain.UserAdmin) == false {
+		h.logger.Println("Alert user does not have role admin")
+		return pkg.ErrorResponse(c, errors.New("forbidden access"), http.StatusForbidden)
+	}
+	h.logger.Printf("admin logged in with email: %s", pkg.ObfuscateDetail(loginUser.Email, "email"))
+	accessToken, err := pkg.GenerateAccessToken(loginUser.ID, domain.UserAdmin, accessTokenExpiry, h.secret)
+	if err != nil {
+		h.logger.Println("error generating token: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
+	}
+	refreshToken, err := pkg.GenerateRefreshToken(loginUser.ID, domain.UserAdmin, refreshTokenExpiry, h.secret)
 	if err != nil {
 		h.logger.Println("error generating token: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)

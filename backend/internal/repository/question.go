@@ -60,12 +60,13 @@ func NewQuestionRepository(db *sql.DB) QuestionRepository {
 }
 
 func (qr *questionRepository) CreateQuestion(ctx context.Context, question Questions) (int64, error) {
-	query := "INSERT INTO questions (subject_id, question, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)"
-	res, err := qr.db.ExecContext(ctx, query, question.SubjectId, question.Question, question.IsMultipleChoice, question.CreatedAt, question.UpdatedAt)
+	query := "INSERT INTO questions (subject_id, question, is_multiple_choice, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	var id int64
+	err := qr.db.QueryRowContext(ctx, query, question.SubjectId, question.Question, question.IsMultipleChoice, question.CreatedAt, question.UpdatedAt).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	return id, nil
 }
 
 func (qr *questionRepository) GetQuestionById(ctx context.Context, id int64) (*Questions, error) {
@@ -91,16 +92,17 @@ func (qr *questionRepository) GetRandomQuestion(ctx context.Context, subjectId i
 }
 
 func (qr *questionRepository) CreateQuestionOption(ctx context.Context, option QuestionOptions) (int64, error) {
-	query := "INSERT INTO question_options (question_id, option, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-	res, err := qr.db.ExecContext(ctx, query, option.QuestionId, option.Option, option.CreatedAt, option.UpdatedAt)
+	query := "INSERT INTO options (question_id, option, is_correct, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	var id int64
+	err := qr.db.QueryRowContext(ctx, query, option.QuestionId, option.Option, option.IsCorrect, option.CreatedAt, option.UpdatedAt).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	return id, nil
 }
 
 func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId int64) ([]QuestionOptions, error) {
-	query := "SELECT id, question_id, option FROM question_options WHERE question_id = $1"
+	query := "SELECT id, question_id, option, is_correct FROM options WHERE question_id = $1"
 	rows, err := qr.db.QueryContext(ctx, query, questionId)
 	if err != nil {
 		return nil, err
@@ -109,7 +111,7 @@ func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId
 	var options []QuestionOptions
 	for rows.Next() {
 		var option QuestionOptions
-		err := rows.Scan(&option.Id, &option.QuestionId, &option.Option)
+		err := rows.Scan(&option.Id, &option.QuestionId, &option.Option, &option.IsCorrect)
 		if err != nil {
 			return nil, err
 		}
@@ -120,10 +122,10 @@ func (qr *questionRepository) GetQuestionOptions(ctx context.Context, questionId
 
 // GetCorrectQuestionOptionByQuestionID returns the correct option for a question without returning the entire options with the question id
 func (qr *questionRepository) GetCorrectQuestionOptionByQuestionID(ctx context.Context, questionId int64) (*QuestionOptions, error) {
-	query := "SELECT id, question_id, option FROM question_options WHERE question_id = $1 AND is_correct = true"
+	query := "SELECT id, question_id, option, is_correct FROM options WHERE question_id = $1 AND is_correct = true"
 	row := qr.db.QueryRowContext(ctx, query, questionId)
 	var option QuestionOptions
-	err := row.Scan(&option.Id, &option.QuestionId, &option.Option)
+	err := row.Scan(&option.Id, &option.QuestionId, &option.Option, &option.IsCorrect)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +133,9 @@ func (qr *questionRepository) GetCorrectQuestionOptionByQuestionID(ctx context.C
 }
 
 func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answers) (int64, error) {
-	query := "INSERT INTO answers (question_id, answer, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-	res, err := qr.db.ExecContext(ctx, query, answer.QuestionId, answer.Answer, answer.CreatedAt, answer.UpdatedAt)
+	query := "INSERT INTO answers (question_id, answer, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	var id int64
+	err := qr.db.QueryRowContext(ctx, query, answer.QuestionId, answer.Answer, answer.CreatedAt, answer.UpdatedAt).Scan(&id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return 0, errors.New("question not found")
@@ -145,7 +148,7 @@ func (qr *questionRepository) CreateAnswer(ctx context.Context, answer Answers) 
 		}
 		return 0, err
 	}
-	return res.LastInsertId()
+	return id, nil
 }
 
 // GetAnswerById returns the answers based on the selected question id.
@@ -195,10 +198,10 @@ func (qr *questionRepository) UpdateAnswerById(ctx context.Context, answer Answe
 }
 
 func (qr *questionRepository) GetQuestionOptionsById(ctx context.Context, id int64) (*QuestionOptions, error) {
-	query := "SELECT id, question_id, option FROM question_options WHERE id = $1"
+	query := "SELECT id, question_id, option, is_correct FROM options WHERE id = $1"
 	row := qr.db.QueryRowContext(ctx, query, id)
 	var option QuestionOptions
-	err := row.Scan(&option.Id, &option.QuestionId, &option.Option)
+	err := row.Scan(&option.Id, &option.QuestionId, &option.Option, &option.IsCorrect)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +241,7 @@ func (qr *questionRepository) DeleteQuestionById(ctx context.Context, id int64) 
 	if err != nil {
 		return err
 	}
-	_, err = qr.db.ExecContext(ctx, "DELETE FROM question_options WHERE question_id = $1", id)
+	_, err = qr.db.ExecContext(ctx, "DELETE FROM options WHERE question_id = $1", id)
 	if err != nil {
 		return err
 	}

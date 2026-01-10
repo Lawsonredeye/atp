@@ -26,6 +26,7 @@ func NewRouter(
 	e.POST("/user/login", userHandler.Login)
 	e.POST("/user/register", userHandler.CreateUser)
 	e.POST("/admin/register", userHandler.CreateUserAdmin)
+	e.POST("/admin/login", userHandler.AdminLogin)
 
 	// Quiz routes
 	e.POST("/quiz/create", quizHandler.CreateQuiz)
