@@ -40,8 +40,8 @@ func NewRouter(
 	api.Use(middleware.JWTAuthMiddleware(cfg.Server.JWTSecret))
 
 	// Admin routes
-	api.POST("/admin/questions/bulk", adminHandler.CreateBulkQuestions)
-	api.POST("/admin/questions/single", adminHandler.UploadSingleQuestion)
+	api.POST("/admin/questions/bulk/:subject_id", adminHandler.CreateBulkQuestions)
+	api.POST("/admin/questions/single/:subject_id", adminHandler.UploadSingleQuestion)
 	api.GET("/admin/questions", adminHandler.GetAllQuestions)
 	api.GET("/admin/questions/:id", adminHandler.GetQuestionById)
 
