@@ -6,6 +6,7 @@ import (
 
 	"github.com/lawson/otterprep/domain"
 	"github.com/lawson/otterprep/internal/repository"
+	"github.com/lawson/otterprep/pkg"
 )
 
 type SubjectService interface {
@@ -28,7 +29,7 @@ func (s *subjectService) GetSubjectById(ctx context.Context, id int64) (*domain.
 	}
 	resp, err := s.subjectRepository.GetSubjectById(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, pkg.ErrSubjectNotFound
 	}
 	return &domain.Subject{
 		Id:   resp.Id,
