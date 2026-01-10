@@ -42,7 +42,7 @@ func main() {
 	quizHandler := handler.NewQuizHandler(quizService, subjectService, logger)
 
 	e := echo.New()
-	router.NewRouter(e, adminHandler, userHandler, quizHandler)
+	router.NewRouter(e, adminHandler, userHandler, quizHandler, cfg)
 
 	logger.Printf("Starting server on port %s", cfg.Server.Port)
 	if err := e.Start(":" + cfg.Server.Port); err != nil {
