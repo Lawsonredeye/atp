@@ -19,6 +19,15 @@ func NewRouter(
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	e.Use(middleware.RecoverMiddleware())
 
+	// Set up CORS
+	var corsConfig middleware.CORSConfig
+	if cfg.Server.Env == "production" {
+		corsConfig = middleware.ProductionCORSConfig(cfg.Server.AllowOrigins)
+	} else {
+		corsConfig = middleware.DefaultCORSConfig()
+	}
+	e.Use(middleware.CORSMiddleware(corsConfig))
+
 	// Set up custom validator
 	e.Validator = middleware.NewValidator()
 

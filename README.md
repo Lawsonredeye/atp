@@ -36,6 +36,10 @@ PORT=8080
 ENV=development
 JWT_SECRET=your-super-secret-key
 
+# CORS (comma-separated list of allowed origins)
+# Use * for development, specific origins for production
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
 # Database
 DB_HOST=localhost
 DB_PORT=5432
@@ -49,6 +53,10 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 ```
+
+**CORS Configuration:**
+- In `development` mode: All origins are allowed (`*`)
+- In `production` mode: Only origins listed in `CORS_ALLOWED_ORIGINS` are allowed
 
 ### 3. Run with Docker
 
@@ -308,6 +316,8 @@ otterprep/
 - ✅ Request validation
 - ✅ Custom error handling
 - ✅ Rate limiting (login, register, API endpoints)
+- ✅ CORS support (configurable for development/production)
+- ✅ Graceful shutdown
 - ✅ Quiz generation by subject
 - ✅ Score tracking
 - ✅ Bulk question upload

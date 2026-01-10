@@ -17,9 +17,10 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port      string
-	Env       string
-	JWTSecret string
+	Port         string
+	Env          string
+	JWTSecret    string
+	AllowOrigins []string
 }
 
 type DatabaseConfig struct {
@@ -44,9 +45,10 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Server: ServerConfig{
-			Port:      getEnv("PORT", "8080"),
-			Env:       getEnv("ENV", "development"),
-			JWTSecret: getEnv("JWT_SECRET", "your-secret-key"),
+			Port:         getEnv("PORT", "8080"),
+			Env:          getEnv("ENV", "development"),
+			JWTSecret:    getEnv("JWT_SECRET", "your-secret-key"),
+			AllowOrigins: getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
@@ -111,6 +113,48 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// getEnvSlice returns a slice of strings from a comma-separated environment variable
+func getEnvSlice(key string, defaultValue []string) []string {
+	if value := os.Getenv(key); value != "" {
+		return splitAndTrim(value, ",")
+	}
+	return defaultValue
+}
+
+// splitAndTrim splits a string by separator and trims whitespace from each part
+func splitAndTrim(s string, sep string) []string {
+	var result []string
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if i+len(sep) <= len(s) && s[i:i+len(sep)] == sep {
+			part := trim(s[start:i])
+			if part != "" {
+				result = append(result, part)
+			}
+			start = i + len(sep)
+		}
+	}
+	// Add the last part
+	part := trim(s[start:])
+	if part != "" {
+		result = append(result, part)
+	}
+	return result
+}
+
+// trim removes leading and trailing whitespace
+func trim(s string) string {
+	start := 0
+	end := len(s)
+	for start < end && (s[start] == ' ' || s[start] == '\t') {
+		start++
+	}
+	for end > start && (s[end-1] == ' ' || s[end-1] == '\t') {
+		end--
+	}
+	return s[start:end]
 }
 
 // parseDuration returns the duration value of the given string
