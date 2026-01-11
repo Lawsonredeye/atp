@@ -199,7 +199,7 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 		return nil, pkg.ErrInvalidPasswordHash
 	}
 	user.PasswordHash = ""
-	s.logger.Println("user logged in: ", user)
+	s.logger.Println("user logged in: ", pkg.ObfuscateDetail(user.Email, "email"))
 	return &domain.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
