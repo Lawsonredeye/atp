@@ -10,6 +10,10 @@ import Dashboard from './pages/Dashboard';
 import Quiz from './pages/Quiz';
 import Leaderboard from './pages/Leaderboard';
 import NotFound from './pages/NotFound';
+import About from './pages/About';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 // Admin Pages
 import { AdminLogin, AdminDashboard } from './pages/admin';
@@ -23,6 +27,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

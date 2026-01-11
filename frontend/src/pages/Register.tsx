@@ -185,9 +185,9 @@ function Register() {
 
               <p className="mt-4 text-center font-body text-sm text-gray-500">
                 By creating an account, you agree to our{' '}
-                <a href="/terms" className="underline hover:text-primary">Terms of Service</a>
+                <Link to="/terms" className="underline hover:text-primary">Terms of Service</Link>
                 {' '}and{' '}
-                <a href="/privacy" className="underline hover:text-primary">Privacy Policy</a>
+                <Link to="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
               </p>
             </div>
           </div>

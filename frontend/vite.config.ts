@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 3000,
+    host: true,
+    allowedHosts: ['holozoic-romelia-infiltrative.ngrok-free.dev'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

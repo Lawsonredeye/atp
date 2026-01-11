@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="bg-secondary text-white border-t-4 border-black py-8 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-display text-2xl font-bold uppercase mb-4">
               Score<span className="text-primary">That</span>Exam
@@ -20,6 +20,15 @@ export function Footer() {
             </ul>
           </div>
           <div>
+            <h4 className="font-display font-bold uppercase mb-4 text-primary">Company</h4>
+            <ul className="space-y-2 font-body">
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+            </ul>
+          </div>
+          <div>
             <h4 className="font-display font-bold uppercase mb-4 text-primary">Subjects</h4>
             <ul className="space-y-2 font-body">
               <li><Link to="/quiz?subject=1" className="hover:text-primary transition-colors">Mathematics</Link></li>
@@ -32,9 +41,17 @@ export function Footer() {
           <span className="font-display font-bold uppercase text-sm">
             © {new Date().getFullYear()} ScoreThatExam. All rights reserved.
           </span>
-          <Link to="/admin/login" className="font-body text-sm text-white/60 hover:text-primary transition-colors">
-            Admin Portal
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="font-body text-sm text-white/60 hover:text-primary transition-colors">
+              Privacy
+            </Link>
+            <Link to="/terms" className="font-body text-sm text-white/60 hover:text-primary transition-colors">
+              Terms
+            </Link>
+            <Link to="/admin/login" className="font-body text-sm text-white/60 hover:text-primary transition-colors">
+              Admin Portal
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
