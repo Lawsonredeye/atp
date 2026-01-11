@@ -38,20 +38,20 @@ import { Layout } from '../components/layout';
 
     const team = [
       {
-        name: 'Dr. Adaeze Okwu',
+        name: 'Lawson Omoregbee',
         role: 'Founder & CEO',
-        description: 'Former JAMB examiner with 15+ years in education.',
+        description: 'Full-stack developer and education enthusiast committed to improving JAMB preparation for students nationwide.',
       },
-      {
-        name: 'Chukwuemeka Obi',
-        role: 'Head of Content',
-        description: 'Curriculum specialist and educational content creator.',
-      },
-      {
-        name: 'Fatima Bello',
-        role: 'Lead Developer',
-        description: 'Full-stack engineer passionate about EdTech.',
-      },
+      // {
+      //   name: 'Chukwuemeka Obi',
+      //   role: 'Head of Content',
+      //   description: 'Curriculum specialist and educational content creator.',
+      // },
+      // {
+      //   name: 'Fatima Bello',
+      //   role: 'Lead Developer',
+      //   description: 'Full-stack engineer passionate about EdTech.',
+      // },
     ];
 
     function About() {
