@@ -5,13 +5,13 @@ import { FileText, CheckCircle, XCircle, AlertTriangle, Scale, Mail } from 'luci
 const sections = [
   {
     title: 'Acceptance of Terms',
-    content: `By accessing or using ScoreThatExam, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
+    content: `By accessing or using AceThatPaper, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
 
 The materials contained in this website are protected by applicable copyright and trademark law. These terms of service may be updated from time to time, and your continued use of the platform constitutes acceptance of any changes.`,
   },
   {
     title: 'User Accounts',
-    content: `To access certain features of ScoreThatExam, you must register for an account. When you register, you agree to:
+    content: `To access certain features of AceThatPaper, you must register for an account. When you register, you agree to:
 
 • Provide accurate, current, and complete information during the registration process
 • Maintain the security of your password and accept all risks of unauthorized access to your account
@@ -22,7 +22,7 @@ We reserve the right to suspend or terminate accounts that violate these terms o
   },
   {
     title: 'Acceptable Use',
-    content: `You agree to use ScoreThatExam only for lawful purposes and in accordance with these Terms. You agree NOT to:
+    content: `You agree to use AceThatPaper only for lawful purposes and in accordance with these Terms. You agree NOT to:
 
 • Use the service for any illegal or unauthorized purpose
 • Attempt to gain unauthorized access to any portion of the platform
@@ -35,7 +35,7 @@ We reserve the right to suspend or terminate accounts that violate these terms o
   },
   {
     title: 'Intellectual Property',
-    content: `All content on ScoreThatExam, including but not limited to questions, explanations, graphics, logos, and software, is the property of ScoreThatExam or its content suppliers and is protected by Nigerian and international copyright laws.
+    content: `All content on AceThatPaper, including but not limited to questions, explanations, graphics, logos, and software, is the property of AceThatPaper or its content suppliers and is protected by Nigerian and international copyright laws.
 
 You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on our website without prior written consent.
 
@@ -43,13 +43,13 @@ The questions provided are based on JAMB syllabus and past examinations. While w
   },
   {
     title: 'User-Generated Content',
-    content: `Any content you submit to ScoreThatExam, including feedback, suggestions, or quiz performance data, may be used by us to improve our services.
+    content: `Any content you submit to AceThatPaper, including feedback, suggestions, or quiz performance data, may be used by us to improve our services.
 
 You retain ownership of any intellectual property rights that you hold in the content you submit. However, by submitting content, you grant us a worldwide, royalty-free license to use, store, and process this content for the purpose of providing and improving our services.`,
   },
   {
     title: 'Disclaimer of Warranties',
-    content: `ScoreThatExam is provided on an "AS IS" and "AS AVAILABLE" basis. We make no warranties, expressed or implied, regarding:
+    content: `AceThatPaper is provided on an "AS IS" and "AS AVAILABLE" basis. We make no warranties, expressed or implied, regarding:
 
 • The accuracy or completeness of any content
 • The availability or reliability of the service
@@ -60,7 +60,7 @@ While we strive to maintain accurate and up-to-date content, we cannot guarantee
   },
   {
     title: 'Limitation of Liability',
-    content: `To the fullest extent permitted by law, ScoreThatExam shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:
+    content: `To the fullest extent permitted by law, AceThatPaper shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:
 
 • Loss of profits or revenue
 • Loss of data or information
@@ -71,7 +71,7 @@ resulting from your use or inability to use the service, even if we have been ad
   },
   {
     title: 'Termination',
-    content: `We may terminate or suspend your account and access to ScoreThatExam immediately, without prior notice or liability, for any reason, including:
+    content: `We may terminate or suspend your account and access to AceThatPaper immediately, without prior notice or liability, for any reason, including:
 
 • Breach of these Terms of Service
 • Suspected fraudulent, abusive, or illegal activity
@@ -83,7 +83,7 @@ Upon termination, your right to use the service will immediately cease. All prov
     title: 'Governing Law',
     content: `These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria, without regard to its conflict of law provisions.
 
-Any disputes arising from these terms or your use of ScoreThatExam shall be resolved through the courts of Nigeria. You agree to submit to the personal and exclusive jurisdiction of the courts located in Lagos, Nigeria.`,
+Any disputes arising from these terms or your use of AceThatPaper shall be resolved through the courts of Nigeria. You agree to submit to the personal and exclusive jurisdiction of the courts located in Lagos, Nigeria.`,
   },
 ];
 
@@ -100,7 +100,7 @@ function Terms() {
             Terms of Service
           </h1>
           <p className="font-body text-lg sm:text-xl text-white/90">
-            Please read these terms carefully before using ScoreThatExam.
+            Please read these terms carefully before using AceThatPaper.
           </p>
           <p className="font-body text-sm text-white/70 mt-4">
             Effective Date: January 11, 2026
@@ -153,7 +153,7 @@ function Terms() {
           <div className="flex items-center gap-4">
             <AlertTriangle className="w-8 h-8 flex-shrink-0" />
             <p className="font-body font-bold">
-              By creating an account or using ScoreThatExam, you acknowledge that you have read,
+              By creating an account or using AceThatPaper, you acknowledge that you have read,
               understood, and agree to be bound by these Terms of Service.
             </p>
           </div>

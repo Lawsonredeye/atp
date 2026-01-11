@@ -71,7 +71,7 @@ function Register() {
               {/* Decorative Card */}
               <Card className="mt-8 p-6 bg-primary">
                 <p className="font-display font-bold text-xl mb-2">
-                  "ScoreThatExam helped me improve my score by 40%!"
+                  "AceThatPaper helped me improve my score by 40%!"
                 </p>
                 <p className="font-body">— Chioma A., UNILAG Aspirant</p>
               </Card>

@@ -34,14 +34,14 @@ const faqs = [
   },
   {
     question: 'Are the practice questions free?',
-    answer: 'Yes! ScoreThatExam is completely free to use. All subjects and questions are available at no cost.',
+    answer: 'Yes! AceThatPaper is completely free to use. All subjects and questions are available at no cost.',
   },
   {
     question: 'How accurate are the JAMB questions?',
     answer: 'Our questions are curated from JAMB syllabus and past examinations. While we strive for accuracy, they are practice questions and may not be identical to actual exams.',
   },
   {
-    question: 'Can I use ScoreThatExam on mobile?',
+    question: 'Can I use AceThatPaper on mobile?',
     answer: 'Yes! Our platform is fully responsive and works great on all devices - phones, tablets, and computers.',
   },
 ];
@@ -266,7 +266,7 @@ function Contact() {
             Based in <span className="text-primary">Lagos, Nigeria</span>
           </h2>
           <p className="font-body text-lg text-white/80 mb-6">
-            ScoreThatExam is proudly Nigerian-built, serving students across the nation
+            AceThatPaper is proudly Nigerian-built, serving students across the nation
             and beyond.
           </p>
           <div className="inline-flex items-center gap-4">

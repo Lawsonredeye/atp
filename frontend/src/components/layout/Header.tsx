@@ -28,7 +28,7 @@ export function Header() {
     <header className="bg-black text-white border-b-4 border-primary py-4 px-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="font-display text-2xl md:text-3xl font-bold uppercase tracking-tight hover:text-primary transition-colors">
-          Score<span className="text-primary">That</span>Exam
+          Ace<span className="text-primary">That</span>Paper
         </Link>
 
         {/* Desktop Nav */}

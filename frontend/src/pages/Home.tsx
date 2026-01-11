@@ -198,7 +198,7 @@ function Home() {
             Ready to Start Your <span className="text-primary">JAMB</span> Prep Journey?
           </h2>
           <p className="font-body text-lg sm:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            Join thousands of students who have improved their scores with ScoreThatExam. It's completely free to get started!
+            Join thousands of students who have improved their scores with AceThatPaper. It's completely free to get started!
           </p>
           {state.isAuthenticated ? (
             <Link to="/quiz">

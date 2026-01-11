@@ -105,12 +105,12 @@ function Privacy() {
           <Card className="p-6 sm:p-8 bg-white">
             <h2 className="font-display text-2xl font-bold mb-4">Introduction</h2>
             <p className="font-body text-gray-700 mb-4">
-              ScoreThatExam ("we," "our," or "us") is committed to protecting your privacy.
+              AceThatPaper ("we," "our," or "us") is committed to protecting your privacy.
               This Privacy Policy explains how we collect, use, disclose, and safeguard your
               information when you use our website and services.
             </p>
             <p className="font-body text-gray-700">
-              By using ScoreThatExam, you agree to the collection and use of information in
+              By using AceThatPaper, you agree to the collection and use of information in
               accordance with this policy. If you do not agree with our policies and practices,
               please do not use our services.
             </p>

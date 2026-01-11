@@ -69,7 +69,7 @@ import { Layout } from '../components/layout';
                   <span className="text-primary">Excel</span>
                 </h1>
                 <p className="font-body text-lg sm:text-xl text-gray-700">
-                  ScoreThatExam is Nigeria's premier JAMB preparation platform, dedicated to helping
+                  AceThatPaper is Nigeria's premier JAMB preparation platform, dedicated to helping
                   students achieve their university admission dreams through comprehensive practice
                   and personalized learning.
                 </p>
@@ -94,7 +94,7 @@ import { Layout } from '../components/layout';
                     comprehensive, and engaging practice materials.
                   </p>
                   <p className="font-body text-lg text-gray-700">
-                    Founded in 2024, ScoreThatExam has already helped thousands of students improve
+                    Founded in 2024, AceThatPaper has already helped thousands of students improve
                     their JAMB scores and secure admission to their dream universities.
                   </p>
                 </div>
@@ -166,7 +166,7 @@ import { Layout } from '../components/layout';
                   Our Team
                 </span>
                 <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-                  Meet the People Behind ScoreThatExam
+                  Meet the People Behind AceThatPaper
                 </h2>
                 <p className="font-body text-lg text-gray-700 max-w-2xl mx-auto">
                   A passionate team of educators, developers, and designers committed to transforming
@@ -195,9 +195,9 @@ import { Layout } from '../components/layout';
               <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
                 Ready to Start Your JAMB Prep?
               </h2>
-              <p className="font-body text-lg mb-8 max-w-2xl mx-auto">
-                Join over 50,000 students already using ScoreThatExam to prepare for their JAMB exams.
-              </p>
+          <p className="font-body text-lg mb-8 max-w-2xl mx-auto">
+            Join over 50,000 students already using AceThatPaper to prepare for their JAMB exams.
+          </p>
               <a
                 href="/register"
                 className="inline-block px-8 py-4 bg-black text-white font-display font-bold uppercase border-4 border-black shadow-brutal hover:bg-secondary active:shadow-none active:translate-x-1 active:translate-y-1 transition-all duration-100"

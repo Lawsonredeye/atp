@@ -39,7 +39,7 @@ export function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t-2 border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-display font-bold uppercase text-sm">
-            © {new Date().getFullYear()} ScoreThatExam. All rights reserved.
+            © {new Date().getFullYear()} AceThatPaper. All rights reserved.
           </span>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="font-body text-sm text-white/60 hover:text-primary transition-colors">
