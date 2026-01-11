@@ -108,17 +108,6 @@ function Login() {
             </div>
           </Card>
 
-          {/* Demo Credentials */}
-          <Card className="mt-4 p-4 bg-accent-yellow">
-            <p className="font-display font-bold text-sm uppercase mb-2">Demo Account</p>
-            <p className="font-body text-sm">
-              Email: <span className="font-mono font-bold">demo@example.com</span>
-            </p>
-            <p className="font-body text-sm">
-              Password: <span className="font-mono font-bold">password123</span>
-            </p>
-          </Card>
-
           {/* Admin Link */}
           <div className="mt-4 text-center">
             <Link
