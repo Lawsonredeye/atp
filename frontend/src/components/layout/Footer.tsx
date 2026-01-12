@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-display text-2xl font-bold uppercase mb-4">
-              Score<span className="text-primary">That</span>Exam
+              Ace<span className="text-primary">That</span>Paper
             </h3>
             <p className="font-body text-white/80">Ace your JAMB exams with confidence.</p>
           </div>
