@@ -22,7 +22,7 @@ type UserResponse struct {
 type RegisterUser struct {
 	Name     string `json:"full_name" validate:"required,min=2,max=100"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6,max=72"`
+	Password string `json:"password" validate:"required,password"`
 }
 
 type LoginUser struct {
@@ -39,7 +39,7 @@ type UpdateEmail struct {
 }
 
 type UpdatePassword struct {
-	NewPassword string `json:"new_password" validate:"required,min=6,max=72"`
+	NewPassword string `json:"new_password" validate:"required,password"`
 }
 
 type UserScore struct {
@@ -92,7 +92,7 @@ type ForgotPasswordRequest struct {
 // ResetPasswordRequest is the request body for resetting password with token
 type ResetPasswordRequest struct {
 	Token       string `json:"token" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=6,max=72"`
+	NewPassword string `json:"new_password" validate:"required,password"`
 }
 
 // ValidateResetTokenRequest is the request to validate a reset token

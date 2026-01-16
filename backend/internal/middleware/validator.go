@@ -3,10 +3,24 @@ package middleware
 import (
 	"net/http"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+)
+
+// Email regex pattern - RFC 5322 compliant with common restrictions
+// This pattern validates:
+// - Local part: alphanumeric, dots, hyphens, underscores, plus signs
+// - Domain: alphanumeric with hyphens, must have at least one dot
+// - TLD: 2-10 alphabetic characters
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$`)
+
+// Password requirements
+const (
+	MinPasswordLength = 8
+	MaxPasswordLength = 72 // bcrypt max length
 )
 
 // CustomValidator wraps the validator package for Echo
@@ -27,7 +41,28 @@ func NewValidator() *CustomValidator {
 		return name
 	})
 
+	// Register custom email validation with regex
+	v.RegisterValidation("email", validateEmail)
+
+	// Register custom password validation
+	v.RegisterValidation("password", validatePassword)
+
 	return &CustomValidator{Validator: v}
+}
+
+// validateEmail validates email format using regex
+func validateEmail(fl validator.FieldLevel) bool {
+	email := fl.Field().String()
+	if email == "" {
+		return false
+	}
+	return emailRegex.MatchString(email)
+}
+
+// validatePassword validates password meets requirements
+func validatePassword(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
+	return len(password) >= MinPasswordLength && len(password) <= MaxPasswordLength
 }
 
 // Validate validates a struct or slice based on validation tags
@@ -97,7 +132,9 @@ func getErrorMessage(e validator.FieldError) string {
 	case "required":
 		return e.Field() + " is required"
 	case "email":
-		return e.Field() + " must be a valid email address"
+		return e.Field() + " must be a valid email address (e.g., user@example.com)"
+	case "password":
+		return e.Field() + " must be between 8 and 72 characters"
 	case "min":
 		return e.Field() + " must be at least " + e.Param() + " characters"
 	case "max":
