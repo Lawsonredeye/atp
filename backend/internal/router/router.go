@@ -54,8 +54,8 @@ func NewRouter(
 	// Refresh token - 10 attempts per minute
 	authGroup.POST("/auth/refresh", userHandler.RefreshToken, middleware.RateLimitMiddleware(middleware.RefreshTokenRateLimiter))
 
-	// Password reset routes - rate limited
-	e.POST("/auth/forgot-password", userHandler.ForgotPassword, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
+	// Password reset routes - rate limited (3 attempts per 5 minutes for email sending)
+	e.POST("/auth/forgot-password", userHandler.ForgotPassword, middleware.RateLimitMiddleware(middleware.PasswordResetRateLimiter))
 	e.POST("/auth/validate-reset-token", userHandler.ValidateResetToken)
 	e.POST("/auth/reset-password", userHandler.ResetPassword, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
 
