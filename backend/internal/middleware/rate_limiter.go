@@ -121,8 +121,8 @@ var (
 	// RegisterRateLimiter: 3 registrations per minute per IP
 	RegisterRateLimiter = NewRateLimiter(3, time.Minute)
 
-	// PasswordResetRateLimiter: 3 requests per 5 minutes per IP
-	PasswordResetRateLimiter = NewRateLimiter(3, 5*time.Minute)
+	// PasswordResetRateLimiter: 2 requests per 5 minutes per IP
+	PasswordResetRateLimiter = NewRateLimiter(2, 5*time.Minute)
 
 	// APIRateLimiter: 100 requests per minute per IP (general API)
 	APIRateLimiter = NewRateLimiter(100, time.Minute)

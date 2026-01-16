@@ -46,8 +46,11 @@ func NewUserHandler(userService service.UserServiceInterface, emailService servi
 // @Router /users [post]
 func (h *UserHandler) CreateUser(c echo.Context) error {
 	var user domain.RegisterUser
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
+		h.logger.Println("error binding user: ", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&user); err != nil {
 		return err
 	}
 	now := time.Now()
@@ -277,12 +280,14 @@ func (h *UserHandler) RefreshToken(c echo.Context) error {
 func (h *UserHandler) UpdateUsername(c echo.Context) error {
 	userID := c.Get("user_id").(int64)
 	var user domain.UpdateUsername
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
-	err = h.userService.UpdateUsername(c.Request().Context(), userID, user.NewUsername)
+	if err := c.Validate(&user); err != nil {
+		return err
+	}
+	err := h.userService.UpdateUsername(c.Request().Context(), userID, user.NewUsername)
 	if err != nil {
 		h.logger.Println("error updating username: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
@@ -305,12 +310,14 @@ func (h *UserHandler) UpdateUsername(c echo.Context) error {
 func (h *UserHandler) UpdateEmail(c echo.Context) error {
 	userID := c.Get("user_id").(int64)
 	var user domain.UpdateEmail
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
-	err = h.userService.UpdateEmail(c.Request().Context(), userID, user.NewEmail)
+	if err := c.Validate(&user); err != nil {
+		return err
+	}
+	err := h.userService.UpdateEmail(c.Request().Context(), userID, user.NewEmail)
 	if err != nil {
 		h.logger.Println("error updating email: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
@@ -333,12 +340,14 @@ func (h *UserHandler) UpdateEmail(c echo.Context) error {
 func (h *UserHandler) UpdatePassword(c echo.Context) error {
 	userID := c.Get("user_id").(int64)
 	var user domain.UpdatePassword
-	err := c.Bind(&user)
-	if err != nil {
+	if err := c.Bind(&user); err != nil {
 		h.logger.Println("error binding user: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
 	}
-	err = h.userService.UpdatePassword(c.Request().Context(), userID, user.NewPassword)
+	if err := c.Validate(&user); err != nil {
+		return err
+	}
+	err := h.userService.UpdatePassword(c.Request().Context(), userID, user.NewPassword)
 	if err != nil {
 		h.logger.Println("error updating password: ", err)
 		return pkg.ErrorResponse(c, err, http.StatusInternalServerError)
