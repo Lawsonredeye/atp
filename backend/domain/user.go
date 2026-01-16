@@ -83,3 +83,19 @@ type UserStats struct {
 	TotalIncorrectAnswers  int64 `json:"total_incorrect_answers"`
 	TotalQuestionsAnswered int64 `json:"total_questions_answered"`
 }
+
+// ForgotPasswordRequest is the request body for initiating a password reset
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// ResetPasswordRequest is the request body for resetting password with token
+type ResetPasswordRequest struct {
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=6,max=72"`
+}
+
+// ValidateResetTokenRequest is the request to validate a reset token
+type ValidateResetTokenRequest struct {
+	Token string `json:"token" validate:"required"`
+}

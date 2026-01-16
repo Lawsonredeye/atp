@@ -19,16 +19,18 @@ var (
 )
 
 type UserHandler struct {
-	userService service.UserServiceInterface
-	logger      *log.Logger
-	secret      string
+	userService  service.UserServiceInterface
+	emailService service.EmailServiceInterface
+	logger       *log.Logger
+	secret       string
 }
 
-func NewUserHandler(userService service.UserServiceInterface, logger *log.Logger, secret string) *UserHandler {
+func NewUserHandler(userService service.UserServiceInterface, emailService service.EmailServiceInterface, logger *log.Logger, secret string) *UserHandler {
 	return &UserHandler{
-		userService: userService,
-		logger:      logger,
-		secret:      secret,
+		userService:  userService,
+		emailService: emailService,
+		logger:       logger,
+		secret:       secret,
 	}
 }
 
@@ -385,4 +387,142 @@ func (h *UserHandler) UserDashboard(c echo.Context) error {
 	}
 	h.logger.Printf("got user dashboard with id: %d", userId)
 	return pkg.SuccessResponse(c, userDashboard, http.StatusOK)
+}
+
+// ForgotPassword initiates a password reset by sending an email with a reset link
+// @Summary Request password reset
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body domain.ForgotPasswordRequest true "Email address"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /auth/forgot-password [post]
+func (h *UserHandler) ForgotPassword(c echo.Context) error {
+	var req domain.ForgotPasswordRequest
+	if err := c.Bind(&req); err != nil {
+		h.logger.Println("error binding forgot password request:", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	// Check if user exists
+	user, err := h.userService.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		// Don't reveal if user exists or not for security
+		h.logger.Println("forgot password - user lookup:", err)
+		// Return success anyway to prevent email enumeration
+		return pkg.SuccessResponse(c, map[string]string{
+			"message": "If an account with that email exists, a password reset link has been sent.",
+		}, http.StatusOK)
+	}
+
+	// Generate reset token and store in Redis
+	token, err := h.emailService.GeneratePasswordResetToken(ctx, user.ID, user.Email)
+	if err != nil {
+		h.logger.Println("error generating password reset token:", err)
+		return pkg.ErrorResponse(c, pkg.ErrInternalServerError, http.StatusInternalServerError)
+	}
+
+	// Send password reset email
+	if err := h.emailService.SendPasswordResetEmail(ctx, user.Email, token); err != nil {
+		h.logger.Println("error sending password reset email:", err)
+		// Invalidate the token if email fails
+		_ = h.emailService.InvalidatePasswordResetToken(ctx, token)
+		return pkg.ErrorResponse(c, pkg.ErrEmailSendFailed, http.StatusInternalServerError)
+	}
+
+	h.logger.Printf("password reset email sent to: %s", pkg.ObfuscateDetail(req.Email, "email"))
+	return pkg.SuccessResponse(c, map[string]string{
+		"message": "If an account with that email exists, a password reset link has been sent.",
+	}, http.StatusOK)
+}
+
+// ValidateResetToken checks if a password reset token is valid
+// @Summary Validate password reset token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body domain.ValidateResetTokenRequest true "Reset token"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /auth/validate-reset-token [post]
+func (h *UserHandler) ValidateResetToken(c echo.Context) error {
+	var req domain.ValidateResetTokenRequest
+	if err := c.Bind(&req); err != nil {
+		h.logger.Println("error binding validate token request:", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	// Validate the token
+	_, _, err := h.emailService.ValidatePasswordResetToken(ctx, req.Token)
+	if err != nil {
+		h.logger.Println("invalid password reset token:", err)
+		return pkg.ErrorResponse(c, pkg.ErrPasswordResetTokenInvalid, http.StatusBadRequest)
+	}
+
+	return pkg.SuccessResponse(c, map[string]interface{}{
+		"valid":   true,
+		"message": "Token is valid",
+	}, http.StatusOK)
+}
+
+// ResetPassword resets the user's password using the reset token
+// @Summary Reset password with token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body domain.ResetPasswordRequest true "Reset token and new password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /auth/reset-password [post]
+func (h *UserHandler) ResetPassword(c echo.Context) error {
+	var req domain.ResetPasswordRequest
+	if err := c.Bind(&req); err != nil {
+		h.logger.Println("error binding reset password request:", err)
+		return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	// Validate the token and get user info
+	userID, _, err := h.emailService.ValidatePasswordResetToken(ctx, req.Token)
+	if err != nil {
+		h.logger.Println("invalid password reset token:", err)
+		return pkg.ErrorResponse(c, pkg.ErrPasswordResetTokenInvalid, http.StatusBadRequest)
+	}
+
+	// Update the password
+	if err := h.userService.UpdatePassword(ctx, userID, req.NewPassword); err != nil {
+		h.logger.Println("error updating password:", err)
+		if errors.Is(err, pkg.ErrInvalidPasswordLength) {
+			return pkg.ErrorResponse(c, err, http.StatusBadRequest)
+		}
+		return pkg.ErrorResponse(c, pkg.ErrInternalServerError, http.StatusInternalServerError)
+	}
+
+	// Invalidate the token after successful password reset
+	if err := h.emailService.InvalidatePasswordResetToken(ctx, req.Token); err != nil {
+		h.logger.Println("error invalidating token (non-critical):", err)
+		// Continue anyway, password was updated
+	}
+
+	h.logger.Printf("password reset successful for user ID: %d", userID)
+	return pkg.SuccessResponse(c, map[string]string{
+		"message": "Password has been reset successfully. You can now login with your new password.",
+	}, http.StatusOK)
 }

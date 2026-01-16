@@ -1,19 +1,23 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Redis    RedisConfig
+	Email    EmailConfig
 }
 
 type ServerConfig struct {
@@ -21,6 +25,7 @@ type ServerConfig struct {
 	Env          string
 	JWTSecret    string
 	AllowOrigins []string
+	FrontendURL  string
 }
 
 type DatabaseConfig struct {
@@ -39,9 +44,22 @@ type RedisConfig struct {
 	DB       int
 }
 
+type EmailConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	From     string
+	FromName string
+}
+
 func Load() (*Config, error) {
 	// Load .env file if it exists (ignore error in production)
-	_ = godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Info: .env file not loaded: %v", err)
+	} else {
+		log.Println("Info: .env file loaded successfully")
+	}
 
 	cfg := &Config{
 		Server: ServerConfig{
@@ -49,6 +67,7 @@ func Load() (*Config, error) {
 			Env:          getEnv("ENV", "development"),
 			JWTSecret:    getEnv("JWT_SECRET", "your-secret-key"),
 			AllowOrigins: getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
+			FrontendURL:  getEnv("FRONTEND_URL", "http://localhost:5173"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
@@ -63,6 +82,14 @@ func Load() (*Config, error) {
 			Port:     getEnv("REDIS_PORT", "6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       0,
+		},
+		Email: EmailConfig{
+			Host:     getEnv("SMTP_HOST", "smtp-relay.brevo.com"),
+			Port:     getEnvInt("SMTP_PORT", 587),
+			Username: getEnv("SMTP_USERNAME", ""),
+			Password: getEnv("SMTP_PASSWORD", ""),
+			From:     getEnv("SMTP_FROM", "noreply@acethatpaper.com"),
+			FromName: getEnv("SMTP_FROM_NAME", "AceThatPaper"),
 		},
 	}
 
@@ -106,11 +133,41 @@ func (c *RedisConfig) Connect() string {
 	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
 
+// RedisInit creates and returns a new Redis client
+func (c *RedisConfig) RedisInit() *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Addr:     c.Address(),
+		Password: c.Password,
+		DB:       c.DB,
+	})
+
+	// Validate the connection by pinging
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		log.Printf("Warning: Failed to connect to Redis: %v", err)
+	}
+
+	return client
+}
+
 // getEnv returns the value of the environment variable with the given key
 // If the environment variable is not set, it returns the default value
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
+	}
+	return defaultValue
+}
+
+// getEnvInt returns the integer value of the environment variable with the given key
+// If the environment variable is not set or invalid, it returns the default value
+func getEnvInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intVal, err := strconv.Atoi(value); err == nil {
+			return intVal
+		}
 	}
 	return defaultValue
 }

@@ -54,6 +54,11 @@ func NewRouter(
 	// Refresh token - 10 attempts per minute
 	authGroup.POST("/auth/refresh", userHandler.RefreshToken, middleware.RateLimitMiddleware(middleware.RefreshTokenRateLimiter))
 
+	// Password reset routes - rate limited
+	e.POST("/auth/forgot-password", userHandler.ForgotPassword, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
+	e.POST("/auth/validate-reset-token", userHandler.ValidateResetToken)
+	e.POST("/auth/reset-password", userHandler.ResetPassword, middleware.RateLimitMiddleware(middleware.LoginRateLimiter))
+
 	// Protected routes with general API rate limiting
 	api := e.Group("/api/v1")
 	api.Use(middleware.JWTAuthMiddleware(cfg.Server.JWTSecret))

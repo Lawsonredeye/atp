@@ -14,6 +14,7 @@ import (
 type UserServiceInterface interface {
 	CreateUserAccount(ctx context.Context, user domain.User, role string) (*domain.User, error)
 	GetUserWithID(ctx context.Context, userId int64) (*domain.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	UpdateUsername(ctx context.Context, userId int64, newUsername string) error
 	UpdateEmail(ctx context.Context, userId int64, newEmail string) error
 	UpdatePassword(ctx context.Context, userId int64, newPassword string) error
@@ -87,6 +88,24 @@ func (s *userService) GetUserWithID(ctx context.Context, userId int64) (*domain.
 	}
 	user.PasswordHash = ""
 	s.logger.Println("getting user with id: ", user)
+	return user, nil
+}
+
+func (s *userService) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	if email == "" {
+		s.logger.Println("error getting user by email: ", pkg.ErrInvalidEmail)
+		return nil, pkg.ErrInvalidEmail
+	}
+	s.logger.Println("getting user with email: ", pkg.ObfuscateDetail(email, "email"))
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Println("error getting user by email: ", err)
+		return nil, pkg.ErrUserNotFound
+	}
+	if user == nil {
+		return nil, pkg.ErrUserNotFound
+	}
+	user.PasswordHash = ""
 	return user, nil
 }
 
