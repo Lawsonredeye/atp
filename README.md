@@ -1,4 +1,4 @@
-# ScoreThatExam 🎯
+# AceThatPaper 🎯
 
 A web application for preparing for JAMB (Joint Admissions and Matriculation Board) exams, powered by JAMB syllabus and past questions.
 
