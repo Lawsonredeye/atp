@@ -59,8 +59,8 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
-SMTP_FROM=noreply@scorethatexam.com
-SMTP_FROM_NAME=ScoreThatExam
+SMTP_FROM=noreply@acethatpaper.com
+SMTP_FROM_NAME=AceThatPaper
 ```
 
 **CORS Configuration:**

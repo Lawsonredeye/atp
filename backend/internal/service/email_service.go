@@ -127,9 +127,10 @@ func (s *emailService) InvalidatePasswordResetToken(ctx context.Context, token s
 	return nil
 }
 
-// SendPasswordResetEmail sends an email with the password reset link
+// SendPasswordResetEmail sends an email with the password reset OTP code
 func (s *emailService) SendPasswordResetEmail(ctx context.Context, email, token string) error {
-	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.frontendURL, token)
+	// Convert token to uppercase for better readability
+	otpCode := token
 
 	// Create the email message
 	m := mail.NewMsg()
@@ -142,7 +143,7 @@ func (s *emailService) SendPasswordResetEmail(ctx context.Context, email, token 
 		return err
 	}
 
-	m.Subject("Reset Your AceThatPaper Password")
+	m.Subject("Your AceThatPaper Password Reset Code")
 
 	// HTML email body
 	htmlBody := fmt.Sprintf(`
@@ -156,60 +157,60 @@ func (s *emailService) SendPasswordResetEmail(ctx context.Context, email, token 
     <table role="presentation" style="width: 100%%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 4px solid #000000;">
         <tr>
             <td style="padding: 40px 30px; text-align: center; background-color: #FFEB3B; border-bottom: 4px solid #000000;">
-                <h1 style="margin: 0; font-size: 32px; color: #000000; text-transform: uppercase;">AceThatPaper</h1>
+                <h1 style="margin: 0; font-size: 32px; color: #000000; text-transform: uppercase;">ScoreThatExam</h1>
             </td>
         </tr>
         <tr>
             <td style="padding: 40px 30px;">
-                <h2 style="margin: 0 0 20px; font-size: 24px; color: #000000;">Password Reset Request</h2>
+                <h2 style="margin: 0 0 20px; font-size: 24px; color: #000000;">Password Reset Code</h2>
                 <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                    We received a request to reset your password. Click the button below to create a new password.
+                    We received a request to reset your password. Use the code below to reset your password:
                 </p>
                 <table role="presentation" style="width: 100%%;">
                     <tr>
-                        <td style="text-align: center; padding: 20px 0;">
-                            <a href="%s" style="display: inline-block; padding: 16px 40px; font-size: 18px; font-weight: bold; color: #000000; background-color: #FFEB3B; text-decoration: none; border: 4px solid #000000; text-transform: uppercase;">Reset Password</a>
+                        <td style="text-align: center; padding: 30px 0;">
+                            <div style="display: inline-block; padding: 20px 40px; font-size: 32px; font-weight: bold; color: #000000; background-color: #FFEB3B; border: 4px solid #000000; letter-spacing: 8px; font-family: monospace;">%s</div>
                         </td>
                     </tr>
                 </table>
                 <p style="margin: 20px 0; font-size: 14px; color: #666666;">
-                    This link will expire in <strong>15 minutes</strong>.
+                    This code will expire in <strong>15 minutes</strong>.
                 </p>
                 <p style="margin: 20px 0; font-size: 14px; color: #666666;">
                     If you didn't request a password reset, please ignore this email or contact support if you have concerns.
                 </p>
                 <hr style="border: none; border-top: 2px solid #000000; margin: 30px 0;">
                 <p style="margin: 0; font-size: 12px; color: #999999;">
-                    If the button doesn't work, copy and paste this link into your browser:<br>
-                    <a href="%s" style="color: #000000;">%s</a>
+                    Enter this code on the password reset page to continue.
                 </p>
             </td>
         </tr>
         <tr>
             <td style="padding: 20px 30px; text-align: center; background-color: #000000; color: #ffffff; font-size: 12px;">
-                &copy; 2026 AceThatPaper. All rights reserved.
+                &copy; 2026 ScoreThatExam. All rights reserved.
             </td>
         </tr>
     </table>
 </body>
 </html>
-`, resetLink, resetLink, resetLink)
+`, otpCode)
 
 	// Plain text alternative
 	plainBody := fmt.Sprintf(`
-Password Reset Request
+Password Reset Code
 
-We received a request to reset your AceThatPaper password.
+We received a request to reset your ScoreThatExam password.
 
-Click the link below to reset your password:
-%s
+Your password reset code is: %s
 
-This link will expire in 15 minutes.
+Enter this code on the password reset page to continue.
+
+This code will expire in 15 minutes.
 
 If you didn't request a password reset, please ignore this email.
 
 © 2026 AceThatPaper. All rights reserved.
-`, resetLink)
+`, otpCode)
 
 	m.SetBodyString(mail.TypeTextPlain, plainBody)
 	m.AddAlternativeString(mail.TypeTextHTML, htmlBody)

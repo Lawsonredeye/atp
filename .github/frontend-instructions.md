@@ -24,7 +24,7 @@
 
 ## What This Project Is
 
-**ScoreThatExam** is a **React-based frontend** for an educational quiz platform designed to help Nigerian students prepare for the **JAMB (Joint Admissions and Matriculation Board)** examination. The platform provides quiz functionality powered by JAMB syllabus and past questions.
+**AceThatPaper** is a **React-based frontend** for an educational quiz platform designed to help Nigerian students prepare for the **JAMB (Joint Admissions and Matriculation Board)** examination. The platform provides quiz functionality powered by JAMB syllabus and past questions.
 
 ---
 
@@ -507,7 +507,7 @@ module.exports = {
     </div>
     
     <div className="mt-8 pt-6 border-t-2 border-white/20 text-center font-display font-bold uppercase">
-      © 2026 ScoreThatExam. All rights reserved.
+      © 2026 AceThatPaper. All rights reserved.
     </div>
   </div>
 </footer>
@@ -933,7 +933,7 @@ Dashboard/Nav → Leaderboard Page
 ```env
 # .env.example
 VITE_API_URL=http://localhost:8080
-VITE_APP_NAME=ScoreThatExam
+VITE_APP_NAME=AceThatPaper
 ```
 
 ---

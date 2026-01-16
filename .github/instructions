@@ -26,7 +26,7 @@
 
 ## What This Project Is
 
-**ScoreThatExam** is a **Go-based REST API backend** for an educational quiz platform designed to help Nigerian students prepare for the **JAMB (Joint Admissions and Matriculation Board)** examination. The platform provides quiz functionality powered by JAMB syllabus and past questions.
+**AceThatPaper** is a **Go-based REST API backend** for an educational quiz platform designed to help Nigerian students prepare for the **JAMB (Joint Admissions and Matriculation Board)** examination. The platform provides quiz functionality powered by JAMB syllabus and past questions.
 
 Built using **Test-Driven Development (TDD)** methodology with comprehensive test coverage.
 
