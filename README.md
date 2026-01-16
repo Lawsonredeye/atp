@@ -35,6 +35,7 @@ Create a `.env` file in the `backend/` directory:
 PORT=8080
 ENV=development
 JWT_SECRET=your-super-secret-key
+FRONTEND_URL=http://localhost:5173
 
 # CORS (comma-separated list of allowed origins)
 # Use * for development, specific origins for production
@@ -48,10 +49,18 @@ DB_PASSWORD=otterprep_password
 DB_NAME=otterprep_db
 DB_SSL_MODE=disable
 
-# Redis (optional)
+# Redis (required for password reset tokens)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
+
+# SMTP Email Configuration (for password reset)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@scorethatexam.com
+SMTP_FROM_NAME=ScoreThatExam
 ```
 
 **CORS Configuration:**
@@ -88,6 +97,9 @@ The server will start on `http://localhost:8080`
 | POST   | `/admin/register`  | Register admin user  | 3/min      |
 | POST   | `/admin/login`     | Admin login          | 5/min      |
 | POST   | `/auth/refresh`    | Refresh access token | 10/min     |
+| POST   | `/auth/forgot-password` | Request password reset | 5/min |
+| POST   | `/auth/validate-reset-token` | Validate reset token | - |
+| POST   | `/auth/reset-password` | Reset password with token | 5/min |
 
 ### Token Refresh
 
@@ -110,6 +122,77 @@ Content-Type: application/json
     "access_token": "new-access-token",
     "refresh_token": "new-refresh-token",
     "expires_in": 900
+  }
+}
+```
+
+### Password Reset Flow
+
+The password reset flow uses Redis to store temporary tokens (expires in 15 minutes).
+
+#### 1. Request Password Reset
+
+```bash
+POST /auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+**Response:** (Always returns success to prevent email enumeration)
+```json
+{
+  "success": true,
+  "data": {
+    "message": "If an account with that email exists, a password reset link has been sent."
+  }
+}
+```
+
+#### 2. Validate Reset Token (Optional)
+
+Use this to check if a token is still valid before showing the reset form:
+
+```bash
+POST /auth/validate-reset-token
+Content-Type: application/json
+
+{
+  "token": "reset-token-from-email-link"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "valid": true,
+    "message": "Token is valid"
+  }
+}
+```
+
+#### 3. Reset Password
+
+```bash
+POST /auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "reset-token-from-email-link",
+  "new_password": "newSecurePassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Password has been reset successfully. You can now login with your new password."
   }
 }
 ```

@@ -26,9 +26,14 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to load config: ", err)
 	}
+
 	logger.Println("Connecting to database...")
 	dbConn := cfg.Database.PostgresInit()
 	logger.Println("Database connected successfully")
+
+	logger.Println("Connecting to Redis...")
+	redisClient := cfg.Redis.RedisInit()
+	logger.Println("Redis connected successfully")
 
 	// Getting all repositories
 	subjectRepository := repository.NewSubjectRepository(dbConn)
@@ -44,10 +49,21 @@ func main() {
 	quizService := service.NewQuizService(quizRepository, subjectRepository, questionRepository, scoreRepository)
 	questionService := service.NewQuestionService(questionRepository, subjectRepository, logger)
 	leaderboardService := service.NewLeaderboardService(leaderboardRepository, subjectRepository)
+	emailService := service.NewEmailService(service.EmailConfig{
+		RedisClient: redisClient,
+		SMTPHost:    cfg.Email.Host,
+		SMTPPort:    cfg.Email.Port,
+		SMTPUser:    cfg.Email.Username,
+		SMTPPass:    cfg.Email.Password,
+		FromEmail:   cfg.Email.From,
+		FromName:    cfg.Email.FromName,
+		FrontendURL: cfg.Server.FrontendURL,
+		Logger:      logger,
+	})
 
 	// Getting all handlers
 	adminHandler := handler.NewAdminHandler(userService, questionService, logger)
-	userHandler := handler.NewUserHandler(userService, logger, cfg.Server.JWTSecret)
+	userHandler := handler.NewUserHandler(userService, emailService, logger, cfg.Server.JWTSecret)
 	quizHandler := handler.NewQuizHandler(quizService, subjectService, logger)
 	leaderboardHandler := handler.NewLeaderboardHandler(leaderboardService, logger)
 
@@ -81,6 +97,11 @@ func main() {
 	// Close database connection
 	if err := dbConn.Close(); err != nil {
 		logger.Printf("Error closing database connection: %v", err)
+	}
+
+	// Close Redis connection
+	if err := redisClient.Close(); err != nil {
+		logger.Printf("Error closing Redis connection: %v", err)
 	}
 
 	logger.Println("Server gracefully stopped")

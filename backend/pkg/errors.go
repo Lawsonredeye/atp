@@ -26,4 +26,7 @@ var (
 	ErrUserRankNotFound           = errors.New("user has no quiz scores yet")
 	ErrInvalidToken               = errors.New("invalid or expired token")
 	ErrRefreshTokenRequired       = errors.New("refresh token is required")
+	ErrPasswordResetTokenExpired  = errors.New("password reset token has expired")
+	ErrPasswordResetTokenInvalid  = errors.New("invalid password reset token")
+	ErrEmailSendFailed            = errors.New("failed to send email")
 )
