@@ -11,7 +11,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source and build
-COPY . .
+COPY .. .
 # Build the binary, disabling CGO for a static binary
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o api-server ./cmd/main.go
 
@@ -22,8 +22,6 @@ WORKDIR /root/
 
 # Copy binary from builder
 COPY --from=builder /app/api-server .
-# Copy any other necessary files (e.g., config, schema.sql if needed at runtime)
-# COPY --from=builder /app/config ./config 
 
 # Expose port (documentary)
 EXPOSE 8080
