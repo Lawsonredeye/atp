@@ -76,7 +76,7 @@ function Home() {
                   <>
                     <Link to="/register">
                       <Button size="lg" className="w-full sm:w-auto">
-                        Let&#44s; Practice <ArrowRight className="inline ml-2 w-5 h-5" />
+                        Let's Practice <ArrowRight className="inline ml-2 w-5 h-5" />
                       </Button>
                     </Link>
                     <Link to="/login">
