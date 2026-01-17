@@ -1,0 +1,48 @@
+# Name of your application. Used to uniquely configure containers.
+service: otterprep-api
+
+# Name of the container image.
+image: <YOUR_DOCKER_USERNAME>/otterprep-api
+
+# Deploy to these servers.
+servers:
+  web:
+    hosts:
+      - <YOUR_SERVER_IP>
+    labels:
+      kamal.proxy.target: "TargetPort:8080" # The port your Go app listens on
+
+# Proxy configuration
+proxy:
+  ssl: false # We are letting Cloudflare handle SSL or using HTTP for now
+  host: api.acethatpaper.com
+  app_port: 8080
+
+# Registry configuration for the image repository
+registry:
+  server: registry.hub.docker.com
+  username: <YOUR_DOCKER_USERNAME>
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Inject environment variables into the container
+env:
+  secret:
+    - DATABASE_URL
+    - JWT_SECRET
+    - REDIS_URL
+  clear:
+    # Set the port explicitly if your Go app uses this env var
+    PORT: 8080
+
+# Aliases to map commonly used commands
+aliases:
+  console: app exec -it -- /bin/bash
+  shell: app exec -it -- /bin/bash
+
+# Configuration for the Builder (using remote usage or local)
+builder:
+  arch: amd64
+  context: backend
+  # If you are on an M1/M2 Mac, you might need to enable remote build or use --arch amd64
+  # remote: ssh://root@<YOUR_SERVER_IP>
