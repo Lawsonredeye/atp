@@ -31,11 +31,11 @@ registry:
 builder:
   arch: amd64
   context: backend
-  # remote: ssh://app@192.168.0.1
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   clear:
+    RAILS_ENV: production
     ENV: production
     DB_HOST: 64.225.39.57
     DB_PORT: 5432
