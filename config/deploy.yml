@@ -41,7 +41,7 @@ env:
     DB_PORT: 5432
     DB_USER: atp_user
     DB_NAME: atp_db
-    REDIS_HOST: atp-redis
+    REDIS_HOST: 64.225.39.57
     REDIS_PORT: 6379
     SMTP_HOST: smtp-relay.brevo.com
     SMTP_PORT: 587
@@ -64,7 +64,7 @@ accessories:
   db:
     image: postgres:16-alpine
     host: 64.225.39.57
-    port: 5432
+    port: 5432:5432
     env:
       clear:
         POSTGRES_USER: atp_user
@@ -80,6 +80,6 @@ accessories:
   redis:
     image: redis:7-alpine
     host: 64.225.39.57
-    port: 6379
+    port: 6379:6379
     directories:
       - data/redis:/data
