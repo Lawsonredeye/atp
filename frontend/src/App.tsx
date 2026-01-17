@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import {Analytics} from "@vercel/analytics/react";
 
 // Pages
 import Home from './pages/Home';
@@ -22,6 +23,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Analytics />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
