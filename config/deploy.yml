@@ -37,7 +37,7 @@ builder:
 env:
   clear:
     ENV: production
-    DB_HOST: otterprep-db
+    DB_HOST: 64.225.39.57
     DB_PORT: 5432
     DB_USER: atp_user
     DB_NAME: atp_db
