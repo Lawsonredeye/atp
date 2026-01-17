@@ -63,7 +63,7 @@ function Home() {
                 </span>
               </h1>
               <p className="font-body text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed">
-                Practice with thousands of past questions, track your progress, and compete with students across Nigeria. Your success starts here!
+                Test your knowledge with thousands of past JAMB questions, track your progress, and compete with students across Nigeria. Your success starts here!
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 {state.isAuthenticated ? (
