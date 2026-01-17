@@ -34,7 +34,11 @@ function Register() {
       setError(null);
       const { confirmPassword: _, ...registerData } = data;
       await registerUser(registerData);
-      navigate('/dashboard', { replace: true });
+      // Registration successful - redirect to login with success message
+      navigate('/login', {
+        replace: true,
+        state: { message: 'Account created successfully! Please log in.' }
+      });
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       setError(axiosError.response?.data?.message || 'Registration failed. Please try again.');

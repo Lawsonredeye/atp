@@ -1,5 +1,5 @@
 import api from './api';
-import type { LoginRequest, RegisterRequest, AuthTokens, UserDashboard, ApiResponse } from '../types';
+import type { LoginRequest, RegisterRequest, AuthTokens, UserDashboard, User, ApiResponse } from '../types';
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthTokens> {
@@ -10,12 +10,11 @@ export const authService = {
     return tokens;
   },
 
-  async register(userData: RegisterRequest): Promise<AuthTokens> {
-    const response = await api.post<ApiResponse<AuthTokens>>('/user/register', userData);
-    const tokens = response.data.data!;
-    localStorage.setItem('access_token', tokens.access_token);
-    localStorage.setItem('refresh_token', tokens.refresh_token);
-    return tokens;
+  async register(userData: RegisterRequest): Promise<User> {
+    const response = await api.post<ApiResponse<User>>('/user/register', userData);
+    // Registration returns user object, not tokens
+    // User needs to login after registration
+    return response.data.data!;
   },
 
   async getDashboard(): Promise<UserDashboard> {
