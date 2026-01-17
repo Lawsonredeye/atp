@@ -36,11 +36,12 @@ builder:
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   clear:
+    ENV: production
     DB_HOST: otterprep-db
     DB_PORT: 5432
-    DB_USER: otterprep
-    DB_NAME: otterprep_db
-    REDIS_HOST: otterprep-redis
+    DB_USER: atp_user
+    DB_NAME: atp_db
+    REDIS_HOST: atp-redis
     REDIS_PORT: 6379
     SMTP_HOST: smtp-relay.brevo.com
     SMTP_PORT: 587
@@ -50,11 +51,12 @@ env:
   secret:
     - DB_PASSWORD
     - JWT_SECRET
+    - SMTP_USERNAME
     - SMTP_PASSWORD
 
 # Use a different ssh user than root.
 ssh:
-  user: tiny-dove
+  user: tiny-ace
   keys: ["~/.ssh/prexmap_key"]
 
 # Use accessory services (secrets come from .kamal/secrets).
@@ -65,8 +67,8 @@ accessories:
     port: 5432
     env:
       clear:
-        POSTGRES_USER: otterprep
-        POSTGRES_DB: otterprep_db
+        POSTGRES_USER: atp_user
+        POSTGRES_DB: atp_db
       secret:
         - POSTGRES_PASSWORD
     files:
