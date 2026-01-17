@@ -115,6 +115,9 @@ func RateLimitByRouteMiddleware(rate int, duration time.Duration) echo.Middlewar
 
 // Predefined rate limiters for common use cases
 var (
+	// HealthCheckLimiter: 9 attempts per minute
+	HealthCheckLimiter = NewRateLimiter(9, time.Minute)
+
 	// LoginRateLimiter: 5 attempts per minute per IP
 	LoginRateLimiter = NewRateLimiter(5, time.Minute)
 

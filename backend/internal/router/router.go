@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lawson/otterprep/config"
 	"github.com/lawson/otterprep/internal/handler"
@@ -39,6 +41,9 @@ func NewRouter(
 		return middleware.MethodNotAllowedHandler(c)
 	}
 
+	e.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "OK")
+	}, middleware.RateLimitMiddleware(middleware.HealthCheckLimiter))
 	// Public routes with rate limiting
 	// Auth routes - stricter rate limits
 	authGroup := e.Group("")
