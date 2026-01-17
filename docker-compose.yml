@@ -1,11 +1,11 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: otterprep-postgres
+    container_name: atp-postgres
     environment:
-      POSTGRES_USER: otterprep
-      POSTGRES_PASSWORD: otterprep_password
-      POSTGRES_DB: otterprep_db
+      POSTGRES_USER: atp_user
+      POSTGRES_PASSWORD: atp_password
+      POSTGRES_DB: atp_db
     ports:
       - "5432:5432"
     volumes:
