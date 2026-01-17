@@ -1,18 +1,18 @@
 # Name of your application. Used to uniquely configure containers.
-service: otterprep
+service: acethatpaper-backend
 
 # Name of the container image.
-image: lawsonredeye/otterprep
+image: lawsonredeye/acethatpaper-backend
 
 # Deploy to these servers.
 servers:
   web:
-    - 192.168.0.1
+    - 64.225.39.57
 
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
 proxy:
-  ssl: true
-  host: app.otterprep.com
+  ssl: false
+  host: api.otterprep.com
   app_port: 8080
   healthcheck:
     path: /health
@@ -20,10 +20,10 @@ proxy:
 
 # Credentials for your image host.
 registry:
-  # server: ghcr.io
+  #  server: localhost:5555
+  # Specify the registry server, if you're not using Docker Hub
+  server: ghcr.io
   username: lawsonredeye
-
-  # Always use an access token rather than real password (pulled from .kamal/secrets).
   password:
     - KAMAL_REGISTRY_PASSWORD
 
@@ -46,17 +46,22 @@ env:
     SMTP_PORT: 587
     SMTP_USERNAME: lawson@otterprep.com
     SMTP_FROM: noreply@otterprep.com
-    FRONTEND_URL: https://app.otterprep.com
+    FRONTEND_URL: https://www.acethatpaper.com
   secret:
     - DB_PASSWORD
     - JWT_SECRET
     - SMTP_PASSWORD
 
+# Use a different ssh user than root.
+ssh:
+  user: tiny-dove
+  keys: ["~/.ssh/prexmap_key"]
+
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
   db:
     image: postgres:16-alpine
-    host: 192.168.0.1
+    host: 64.225.39.57
     port: 5432
     env:
       clear:
@@ -72,7 +77,7 @@ accessories:
 
   redis:
     image: redis:7-alpine
-    host: 192.168.0.1
+    host: 64.225.39.57
     port: 6379
     directories:
       - data/redis:/data
