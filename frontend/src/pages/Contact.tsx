@@ -7,14 +7,14 @@ const contactMethods = [
   {
     icon: Mail,
     title: 'Email Us',
-    value: 'support@scorethatexam.com',
+    value: 'acethatpaper@outlook.com',
     description: 'Send us an email anytime',
     color: 'bg-primary',
   },
   {
     icon: Phone,
     title: 'Call Us',
-    value: '+234 800 123 4567',
+    value: '+234 811 547 5539',
     description: 'Mon-Fri, 9am-5pm WAT',
     color: 'bg-accent-green',
   },

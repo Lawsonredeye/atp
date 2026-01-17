@@ -12,7 +12,7 @@ servers:
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
 proxy:
   ssl: true
-  host: api.otterprep.com
+  host: api.acethatpaper.com
   app_port: 8080
   healthcheck:
     path: /health
