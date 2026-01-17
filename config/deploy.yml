@@ -1,14 +1,14 @@
 # Name of your application. Used to uniquely configure containers.
-service: otterprep-api
+service: acethatpaper-api
 
 # Name of the container image.
-image: <YOUR_DOCKER_USERNAME>/otterprep-api
+image: <YOUR_DOCKER_USERNAME>/acethatpaper-api
 
 # Deploy to these servers.
 servers:
   web:
     hosts:
-      - <YOUR_SERVER_IP>
+      - 64.225.39.57
     labels:
       kamal.proxy.target: "TargetPort:8080" # The port your Go app listens on
 
@@ -21,7 +21,7 @@ proxy:
 # Registry configuration for the image repository
 registry:
   server: registry.hub.docker.com
-  username: <YOUR_DOCKER_USERNAME>
+  username: lawsonredeye
   password:
     - KAMAL_REGISTRY_PASSWORD
 
