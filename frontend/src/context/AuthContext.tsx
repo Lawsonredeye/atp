@@ -1,13 +1,14 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 import { authService } from '../services';
-import type { AuthState, AuthTokens, LoginRequest, RegisterRequest, UserDashboard } from '../types';
+import type { AuthState, AuthTokens, LoginRequest, RegisterRequest, UserDashboard, User } from '../types';
 
 type AuthAction =
   | { type: 'AUTH_START' }
   | { type: 'AUTH_SUCCESS'; payload: { user: UserDashboard; tokens: AuthTokens } }
   | { type: 'AUTH_FAILURE' }
   | { type: 'LOGOUT' }
-  | { type: 'SET_USER'; payload: UserDashboard };
+  | { type: 'SET_USER'; payload: UserDashboard }
+  | { type: 'REGISTER_SUCCESS' };
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -28,6 +29,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...initialState, loading: false };
     case 'SET_USER':
       return { ...state, user: action.payload, loading: false };
+    case 'REGISTER_SUCCESS':
+      return { ...state, loading: false };
     default:
       return state;
   }
@@ -36,7 +39,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 interface AuthContextType {
   state: AuthState;
   login: (credentials: LoginRequest) => Promise<void>;
-  register: (userData: RegisterRequest) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -77,12 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (userData: RegisterRequest) => {
+  const register = async (userData: RegisterRequest): Promise<User> => {
     dispatch({ type: 'AUTH_START' });
     try {
-      const tokens = await authService.register(userData);
-      const dashboard = await authService.getDashboard();
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user: dashboard, tokens } });
+      const user = await authService.register(userData);
+      dispatch({ type: 'REGISTER_SUCCESS' });
+      return user;
     } catch (error) {
       dispatch({ type: 'AUTH_FAILURE' });
       throw error;

@@ -16,6 +16,7 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+  const successMessage = (location.state as { message?: string })?.message;
 
   const {
     register,
@@ -53,6 +54,12 @@ function Login() {
 
           {/* Login Form Card */}
           <Card className="p-6 sm:p-8">
+            {successMessage && (
+              <Alert variant="success" className="mb-6">
+                {successMessage}
+              </Alert>
+            )}
+
             {error && (
               <Alert variant="error" className="mb-6">
                 {error}
