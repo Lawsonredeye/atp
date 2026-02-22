@@ -57,7 +57,7 @@ env:
 # Use a different ssh user than root.
 ssh:
   user: tiny-ace
-  keys: ["~/.ssh/prexmap_key"]
+  keys: ["~/.ssh/tiny-ace"]
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
