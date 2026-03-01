@@ -26,9 +26,11 @@ function SkeletonRow() {
   return (
     <div className="bg-white grid grid-cols-12 gap-4 p-4 border-t-3 border-black animate-pulse">
       <div className="col-span-2 sm:col-span-1"><div className="h-6 bg-gray-200 rounded w-8" /></div>
-      <div className="col-span-5 sm:col-span-5"><div className="h-6 bg-gray-200 rounded w-3/4" /></div>
-      <div className="col-span-2 sm:col-span-3"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
-      <div className="col-span-3 sm:col-span-3"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
+      <div className="col-span-4 sm:col-span-3"><div className="h-6 bg-gray-200 rounded w-3/4" /></div>
+      <div className="hidden sm:block sm:col-span-2"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
+      <div className="hidden sm:block sm:col-span-2"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
+      <div className="col-span-3 sm:col-span-2"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
+      <div className="col-span-3 sm:col-span-2"><div className="h-6 bg-gray-200 rounded w-1/2" /></div>
     </div>
   );
 }
@@ -39,9 +41,11 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
       <div className="border-4 border-black shadow-brutal-lg overflow-hidden">
         <div className="bg-secondary text-white grid grid-cols-12 gap-4 p-4 font-display font-bold uppercase text-sm sm:text-base">
           <div className="col-span-2 sm:col-span-1">Rank</div>
-          <div className="col-span-5 sm:col-span-5">Name</div>
-          <div className="col-span-2 sm:col-span-3">Score</div>
-          <div className="col-span-3 sm:col-span-3">Accuracy</div>
+          <div className="col-span-4 sm:col-span-3">Name</div>
+          <div className="hidden sm:block sm:col-span-2">Quizzes</div>
+          <div className="hidden sm:block sm:col-span-2">Questions</div>
+          <div className="col-span-3 sm:col-span-2">Score</div>
+          <div className="col-span-3 sm:col-span-2">Accuracy</div>
         </div>
         {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
       </div>
@@ -66,9 +70,11 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
       {/* Table Header */}
       <div className="bg-secondary text-white grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4 font-display font-bold uppercase text-xs sm:text-base">
         <div className="col-span-2 sm:col-span-1">Rank</div>
-        <div className="col-span-4 sm:col-span-5">Name</div>
-        <div className="col-span-3 sm:col-span-3">Score</div>
-        <div className="col-span-3 sm:col-span-3">Accuracy</div>
+        <div className="col-span-4 sm:col-span-3">Name</div>
+        <div className="hidden sm:block sm:col-span-2">Quizzes</div>
+        <div className="hidden sm:block sm:col-span-2">Questions</div>
+        <div className="col-span-3 sm:col-span-2">Score</div>
+        <div className="col-span-3 sm:col-span-2">Accuracy</div>
       </div>
 
       {/* User's Rank (if not in top entries) */}
@@ -78,14 +84,20 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
             <div className="col-span-2 sm:col-span-1 flex items-center">
               <span className="font-display font-bold text-lg sm:text-xl">#{userRank.rank}</span>
             </div>
-            <div className="col-span-4 sm:col-span-5 font-body font-bold flex items-center gap-2">
+            <div className="col-span-4 sm:col-span-3 font-body font-bold flex items-center gap-2">
               <span className="truncate">{userRank.user_name}</span>
               <span className="text-xs bg-black text-white px-2 py-0.5 uppercase">You</span>
             </div>
-            <div className="col-span-3 sm:col-span-3 font-display font-bold">
+            <div className="hidden sm:block sm:col-span-2 font-display font-bold">
+              {userRank.total_quizzes}
+            </div>
+            <div className="hidden sm:block sm:col-span-2 font-display font-bold">
+              {userRank.total_questions}
+            </div>
+            <div className="col-span-3 sm:col-span-2 font-display font-bold">
               {formatScore(userRank.total_score)}
             </div>
-            <div className="col-span-3 sm:col-span-3 font-display font-bold text-accent-green">
+            <div className="col-span-3 sm:col-span-2 font-display font-bold text-accent-green">
               {formatPercentage(userRank.accuracy_percent, 0)}
             </div>
           </div>
@@ -114,9 +126,8 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
         return (
           <div
             key={entry.user_id}
-            className={`${rowClass} grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4 ${
-              index === 0 && !showUserRankSeparately ? 'border-t-4' : 'border-t-3'
-            } border-black transition-colors hover:bg-cream`}
+            className={`${rowClass} grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4 ${index === 0 && !showUserRankSeparately ? 'border-t-4' : 'border-t-3'
+              } border-black transition-colors hover:bg-cream`}
           >
             <div className="col-span-2 sm:col-span-1 flex items-center justify-center sm:justify-start">
               {isTopThree ? (
@@ -127,7 +138,7 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
                 <span className="font-display font-bold text-lg">#{entry.rank}</span>
               )}
             </div>
-            <div className="col-span-4 sm:col-span-5 font-body flex items-center gap-2">
+            <div className="col-span-4 sm:col-span-3 font-body flex items-center gap-2">
               <span className={`truncate ${isCurrentUser ? 'font-bold' : ''}`}>
                 {entry.user_name}
               </span>
@@ -136,13 +147,18 @@ export function LeaderboardTable({ entries, currentUserId, userRank, isLoading }
               )}
               {entry.rank === 1 && <span className="flex-shrink-0">🏆</span>}
             </div>
-            <div className="col-span-3 sm:col-span-3 font-display font-bold">
+            <div className="hidden sm:block sm:col-span-2 font-display font-bold">
+              {entry.total_quizzes}
+            </div>
+            <div className="hidden sm:block sm:col-span-2 font-display font-bold">
+              {entry.total_questions}
+            </div>
+            <div className="col-span-3 sm:col-span-2 font-display font-bold">
               {formatScore(entry.total_score)}
             </div>
-            <div className={`col-span-3 sm:col-span-3 font-display font-bold ${
-              entry.accuracy_percent >= 80 ? 'text-accent-green' : 
-              entry.accuracy_percent >= 50 ? 'text-primary' : 'text-accent-red'
-            }`}>
+            <div className={`col-span-3 sm:col-span-2 font-display font-bold ${entry.accuracy_percent >= 80 ? 'text-accent-green' :
+                entry.accuracy_percent >= 50 ? 'text-primary' : 'text-accent-red'
+              }`}>
               {formatPercentage(entry.accuracy_percent, 0)}
             </div>
           </div>
