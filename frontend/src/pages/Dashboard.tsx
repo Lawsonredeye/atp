@@ -91,6 +91,7 @@ function Dashboard() {
   ];
 
   const questionOptions = [
+    { value: '1', label: '1 Question' },
     { value: '10', label: '10 Questions' },
     { value: '20', label: '20 Questions' },
     { value: '30', label: '30 Questions' },
