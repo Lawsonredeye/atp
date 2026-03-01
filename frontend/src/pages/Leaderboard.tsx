@@ -20,7 +20,7 @@ function Leaderboard() {
   const [error, setError] = useState<string | null>(null);
 
   // Filter state
-  const [period, setPeriod] = useState<Period>('all_time');
+  const [period, setPeriod] = useState<Period>('weekly');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
 
   const fetchSubjects = useCallback(async () => {
@@ -68,7 +68,6 @@ function Leaderboard() {
   ];
 
   const subjectOptions = [
-    { value: '', label: 'All Subjects' },
     ...subjects.map(s => ({ value: s.id.toString(), label: s.name })),
   ];
 
