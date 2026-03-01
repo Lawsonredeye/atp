@@ -23,7 +23,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
-  const [numQuestions, setNumQuestions] = useState<string>('10');
+  const [numQuestions, setNumQuestions] = useState<string>('60');
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,12 +91,11 @@ function Dashboard() {
   ];
 
   const questionOptions = [
-    { value: '5', label: '5 Questions' },
     { value: '10', label: '10 Questions' },
-    { value: '15', label: '15 Questions' },
     { value: '20', label: '20 Questions' },
     { value: '30', label: '30 Questions' },
     { value: '50', label: '50 Questions' },
+    { value: '60', label: '60 Questions' },
   ];
 
   return (
