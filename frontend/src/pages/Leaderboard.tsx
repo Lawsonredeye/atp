@@ -41,11 +41,27 @@ function Leaderboard() {
 
       const [leaderboardData, userRankData] = await Promise.all([
         leaderboardService.getLeaderboard({ limit: 50, period, subject_id: subjectId }),
-        leaderboardService.getMyRank(subjectId).catch(() => null),
+        period === 'all_time' ? leaderboardService.getMyRank(subjectId).catch(() => null) : Promise.resolve(null),
       ]);
 
-      setEntries(leaderboardData.entries || []);
-      setUserRank(userRankData);
+      const fetchedEntries = leaderboardData.entries || [];
+      let finalUserRank = null;
+
+      const userEntry = fetchedEntries.find(e => e.user_id === state.user?.id);
+
+      if (userEntry) {
+        // User is in the top 50 for this period/subject!
+        finalUserRank = {
+          ...userEntry,
+          total_users: leaderboardData.total_users || fetchedEntries.length,
+        };
+      } else if (period === 'all_time') {
+        // User is not in top 50, but we're looking at all-time, so we can use the backend endpoint
+        finalUserRank = userRankData;
+      }
+
+      setEntries(fetchedEntries);
+      setUserRank(finalUserRank);
     } catch (err) {
       setError('Failed to load leaderboard. Please try again.');
     } finally {
