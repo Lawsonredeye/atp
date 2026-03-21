@@ -52,7 +52,7 @@ export function QuizResultCard({ result, onReviewAnswers, onStartNewQuiz }: Quiz
       <Card className="mb-6">
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 border-r-3 border-black">
-            <div className="text-4xl font-display font-bold text-primary">{result.score}</div>
+            <div className="text-4xl font-display font-bold text-primary">{Math.round(accuracy)}</div>
             <div className="font-body font-medium">Total Score</div>
           </div>
           <div className="text-center p-4">
