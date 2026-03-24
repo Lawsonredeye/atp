@@ -1,7 +1,18 @@
-import { Trophy, CheckCircle, XCircle } from 'lucide-react';
+import { Trophy, CheckCircle, XCircle, Users } from 'lucide-react';
 import { Card, Button } from '../ui';
 import type { QuizSubmitResponse } from '../../types';
 import { formatPercentage } from '../../utils/formatters';
+
+const FacebookIcon = ({ className = "w-6 h-6 mr-3" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" />
+  </svg>
+);
 
 interface QuizResultProps {
   result: QuizSubmitResponse;
@@ -62,9 +73,36 @@ export function QuizResultCard({ result, onReviewAnswers, onStartNewQuiz }: Quiz
         </div>
       </Card>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <Button onClick={onReviewAnswers} variant="outline" className="flex-1">Review Answers</Button>
         <Button onClick={onStartNewQuiz} className="flex-1">New Quiz</Button>
+      </div>
+
+      {/* Viral Loop / Call to Actions */}
+      <div className="flex flex-col gap-4 mt-8 pt-6 border-t-3 border-black">
+        <h3 className="font-display font-bold text-center uppercase">Next Steps</h3>
+
+        {accuracy >= 50 ? (
+          <a
+            href={`https://www.facebook.com/sharer/sharer.php?u=https://acethatpaper.com&quote=I just scored ${Math.round(accuracy)}% on a JAMB Mock Exam on AceThatPaper! 🏆 Can you beat my score?`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center p-4 bg-[#1877F2] text-white border-4 border-black shadow-brutal hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-display font-bold text-lg"
+          >
+            <FacebookIcon />
+            Share Your Score on Facebook
+          </a>
+        ) : null}
+
+        <a
+          href="https://web.facebook.com/share/g/19zEFhz12A/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center justify-center p-4 bg-white text-black border-4 border-black shadow-brutal hover:bg-cream hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-display font-bold text-lg"
+        >
+          <Users className="w-6 h-6 mr-3 text-[#1877F2]" />
+          Join the Facebook Study Group
+        </a>
       </div>
     </div>
   );
