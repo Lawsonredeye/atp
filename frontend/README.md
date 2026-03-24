@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# AceThatPaper (Frontend) 🚀
+AceThatPaper is a modern, high-performance web application designed to help Nigerian students excel in their JAMB exams. It features a rapidly scalable exam simulation engine combined with gamified, viral social elements.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🌟 Key Features Implemented
 
-Currently, two official plugins are available:
+### 1. The Core Exam Engine
+- **Subject & Quiz Selection**: Users can choose any available subject and dynamically select the number of questions (up to 60) per session.
+- **Real-Time Scoring System**: Accuracy is dynamically calculated. Rather than showing a raw correct count, Total Scores are intelligently scaled out of 100 on completion to match familiar grading structures.
+- **Explanations:** Students don't just see what they missed; they get detailed explanations for every single answer immediately after testing.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 2. Gamification & Leaderboard
+- **Global & Periodic Rankings**: The highly competitive leaderboard supports `All Time`, `This Week`, and `This Month` filters, allowing students to compete on short-term milestones.
+- **Intelligent User Rank Tracking**: The backend `userRank` is smoothly integrated on the frontend so the user can see their exact rank contextualized securely within the currently active time-filter.
 
-## React Compiler
+### 3. Progressive Web App (PWA) 📱
+- **Zero-Friction Installs**: Using `vite-plugin-pwa`, the site is fully installable on Android and iOS devices directly from the browser (bypassing the App Store entirely).
+- **Offline Reliability**: The service worker caches static assets to ensure fast load times across unpredictable internet connections.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 4. Viral Loops & Monetization 💸
+- **WhatsApp Share Gateway**: Upon scoring >= 50% in a quiz session, students are prompted to automatically broadcast a brag/challenge to their WhatsApp statuses, artificially injecting viral growth.
+- **Facebook Community Integration**: Strategic "Join the Group" Call-to-Actions funnel isolated users into the massive 1.2M member Facebook study group.
+- **AdSense Ready**: Base integration for Google Auto Ads is implemented in `<head>` to begin monetizing the spike in Facebook organic traffic.
 
-## Expanding the ESLint configuration
+### 5. UI/UX: Neobrutalism
+- Designed using TailwindCSS to implement a **Neobrutalist** aesthetic (thick black borders, harsh shadows, stark high-contrast colors). It feels deliberately modern, gamified, and distinct from traditional "boring" academic apps.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠 Tech Stack
+- **Framework**: React.js 18 + Vite
+- **Routing**: React Router
+- **Global State**: React Context API (`AuthContext`)
+- **Styling**: Tailwind CSS v3
+- **Icons**: `lucide-react` & Custom SVGs
+- **Deployment**: Vercel (Configured via `vercel.json` for SPA rewrites)
+- **Backend API**: Echo (Golang)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Getting Started Locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# 1. Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# 2. Setup your Environment Variables
+cp .env.example .env
+# Edit .env and enter your VITE_API_URL
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 3. Start the dev server
+npm run dev
 ```
